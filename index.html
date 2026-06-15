@@ -110,11 +110,12 @@
   .error-msg{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;color:#dc2626;font-size:13px;margin-bottom:12px;}
 
   /* Trend arrows on stat cards */
-  .stat-trend{font-size:11px;font-weight:600;margin-top:3px;display:flex;align-items:center;gap:3px;}
-  .trend-up{color:#059669;font-weight:700;} .trend-down{color:#dc2626;font-weight:700;} .trend-flat{color:#94a3b8;font-weight:600;}
+  .stat-trend{font-size:11px;font-weight:400;margin-top:3px;display:flex;align-items:center;gap:3px;}
+  .trend-up{color:#059669;font-weight:400;} .trend-down{color:#dc2626;font-weight:400;} .trend-flat{color:#94a3b8;font-weight:400;}
 
   /* Funnel */
-  .funnel-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;}
+  .funnel-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
+  .funnel-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
   .funnel-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:14px;}
   .funnel-stages{display:flex;align-items:stretch;gap:0;}
   .funnel-stage{flex:1;position:relative;}
@@ -128,12 +129,14 @@
   .funnel-row{display:flex;align-items:center;}
 
   /* Trend line chart */
-  .trend-chart-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 10px;margin-bottom:12px;}
+  .trend-chart-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 10px;margin-bottom:12px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
+  .trend-chart-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
   .trend-chart-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:10px;}
   .trend-svg-wrap{overflow-x:auto;}
 
   /* Goal tracker */
-  .goal-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .goal-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
+  .goal-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
   .goal-label{font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;}
   .goal-title{font-size:15px;font-weight:700;color:#0f172a;}
   .goal-bar-wrap{flex:1;min-width:200px;}
@@ -147,7 +150,8 @@
   .goal-emoji{font-size:28px;}
 
   /* Insights / Streaks */
-  .insights-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;}
+  .insights-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
+  .insights-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
   .insights-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:10px;}
   .insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
   .insight-chip{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;}
@@ -250,7 +254,44 @@
         <div class="goal-stat"><div class="gval" id="goal-current">—</div><div class="glabel">This Month</div></div>
         <div class="goal-stat"><div class="gval" id="goal-remaining">—</div><div class="glabel">Remaining</div></div>
         <div class="goal-stat"><div class="gval" id="goal-target">30</div><div class="glabel">Target</div></div>
-        <div class="goal-emoji" id="goal-emoji">⏳</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3 id="admits-chart-title">Admits by Agent</h3>
+        <div class="donut-wrap">
+          <svg class="donut-svg" id="donut-admits" viewBox="0 0 180 180"></svg>
+          <div class="legend" id="legend-admits"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 id="vob-chart-title">VOB Rate by Agent</h3>
+        <div class="donut-wrap">
+          <svg class="donut-svg" id="donut-vob" viewBox="0 0 180 180"></svg>
+          <div class="legend" id="legend-vob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="leaderboard-card" style="margin-bottom:12px;">
+      <div class="lb-header">
+        <h3><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><polyline points="8 6 2 6 2 12"/><path d="M2 12a10 10 0 0 0 20 0"/><polyline points="16 6 22 6 22 12"/><line x1="12" y1="22" x2="12" y2="17"/><line x1="8" y1="22" x2="16" y2="22"/></svg>Leaderboard — <span id="lb-period">June 2026</span></h3>
+        <div class="lb-sort" id="lb-sort-label">Ranked by Total Admits ↓ · VOB Rate ↓ (tiebreaker) · Click column to re-rank</div>
+      </div>
+      <div id="table-wrap"><div class="loading"><div class="spinner"></div> Loading data from Google Sheets...</div></div>
+    </div>
+
+    <!-- Team Trend Over Time -->
+    <div class="trend-chart-card" id="trend-chart-card">
+      <h3>📈 Team Performance Over Time (All Months)</h3>
+      <div class="trend-svg-wrap">
+        <svg id="trend-line-chart" style="display:block;"></svg>
+      </div>
+      <div style="display:flex;gap:18px;margin-top:8px;justify-content:center;flex-wrap:wrap;">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Total Calls</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div><span>Total VOBs</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span>Total Admits</span></div>
       </div>
     </div>
 
@@ -287,19 +328,6 @@
       </div>
     </div>
 
-    <!-- Team Trend Over Time -->
-    <div class="trend-chart-card" id="trend-chart-card">
-      <h3>📈 Team Performance Over Time (All Months)</h3>
-      <div class="trend-svg-wrap">
-        <svg id="trend-line-chart" style="display:block;"></svg>
-      </div>
-      <div style="display:flex;gap:18px;margin-top:8px;justify-content:center;flex-wrap:wrap;">
-        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Total Calls</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div><span>Total VOBs</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span>Total Admits</span></div>
-      </div>
-    </div>
-
     <!-- Insights & Streaks -->
     <div class="insights-card" id="insights-card">
       <h3>🔍 Team Insights &amp; Consistency</h3>
@@ -308,30 +336,6 @@
       </div>
     </div>
 
-    <div class="charts-row">
-      <div class="chart-card">
-        <h3 id="admits-chart-title">Admits by Agent</h3>
-        <div class="donut-wrap">
-          <svg class="donut-svg" id="donut-admits" viewBox="0 0 180 180"></svg>
-          <div class="legend" id="legend-admits"></div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <h3 id="vob-chart-title">VOB Rate by Agent</h3>
-        <div class="donut-wrap">
-          <svg class="donut-svg" id="donut-vob" viewBox="0 0 180 180"></svg>
-          <div class="legend" id="legend-vob"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="leaderboard-card">
-      <div class="lb-header">
-        <h3><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><polyline points="8 6 2 6 2 12"/><path d="M2 12a10 10 0 0 0 20 0"/><polyline points="16 6 22 6 22 12"/><line x1="12" y1="22" x2="12" y2="17"/><line x1="8" y1="22" x2="16" y2="22"/></svg>Leaderboard — <span id="lb-period">June 2026</span></h3>
-        <div class="lb-sort" id="lb-sort-label">Ranked by Total Admits ↓ · VOB Rate ↓ (tiebreaker) · Click column to re-rank</div>
-      </div>
-      <div id="table-wrap"><div class="loading"><div class="spinner"></div> Loading data from Google Sheets...</div></div>
-    </div>
   </div>
 
   <div id="section-agent" style="display:none">
@@ -615,7 +619,6 @@ function renderGoalTracker(admits){
   else if(pct>=75){emoji='🔥';sub=`Almost there — ${remaining} more to hit the target!`;}
   else if(pct>=50){emoji='💪';sub=`Halfway there — ${remaining} admits to go!`;}
   else{emoji='⏳';sub=`${remaining} admits needed to reach the ${MONTHLY_ADMIT_TARGET}-admit goal`;}
-  document.getElementById('goal-emoji').textContent=emoji;
   document.getElementById('goal-subtext').textContent=sub;
   // Color shift when goal met
   document.getElementById('goal-fill').style.background=admits>=MONTHLY_ADMIT_TARGET?
