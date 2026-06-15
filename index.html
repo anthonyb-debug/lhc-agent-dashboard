@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Legacy Healing Center — Agent Dashboard</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#eff4fa;color:#1a2332;min-height:100vh;font-size:14px;}
+
+  /* Main */
+  .main{padding:18px 22px;min-height:100vh;max-width:1500px;margin:0 auto;}
+
+  /* Topbar */
+  .topbar{background:#ffffff;border:1px solid #d6ecfb;border-radius:14px;padding:14px 20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:4px solid #0ea5e9;flex-wrap:wrap;}
+  .topbar-left{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .brand-logo{height:52px;display:block;}
+  .brand-text .eyebrow{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#0ea5e9;font-weight:700;margin-bottom:2px;}
+  .brand-text h1{font-size:23px;font-weight:700;color:#0f172a;line-height:1.15;}
+  .topbar-nav{display:flex;gap:6px;flex-wrap:wrap;}
+  .nav-pill{padding:6px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;font-size:13px;font-weight:600;color:#64748b;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+  .nav-pill:hover{border-color:#0ea5e9;color:#0ea5e9;}
+  .nav-pill.active{background:#0ea5e9;color:#fff;border-color:#0ea5e9;}
+
+  .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .info-box{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:6px 14px;min-width:100px;}
+  .info-box label{font-size:10px;color:#94a3b8;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;display:block;margin-bottom:2px;}
+  .info-box .info-val{font-size:14px;font-weight:700;color:#0f172a;}
+  .btn-refresh{padding:9px 16px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#0f172a;display:flex;align-items:center;gap:6px;height:100%;}
+  .btn-refresh:hover{background:#f8fafc;border-color:#0ea5e9;color:#0ea5e9;}
+
+  /* Toggle (Monthly / All Time) */
+  .view-toggle{display:flex;gap:6px;}
+  .btn-toggle{padding:5px 13px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;font-size:13px;font-weight:500;cursor:pointer;color:#64748b;transition:all 0.15s;}
+  .btn-toggle.active{background:#0ea5e9;color:#fff;border-color:#0ea5e9;}
+
+  /* Filters */
+  .filters{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
+  .filter-group{display:flex;align-items:center;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;}
+  .filter-label{font-size:11px;color:#94a3b8;padding:0 8px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;border-right:1px solid #e2e8f0;height:32px;display:flex;align-items:center;}
+  .filter-val{font-size:14px;font-weight:500;color:#0f172a;padding:0 10px;height:32px;display:flex;align-items:center;}
+  .filter-arrow{width:24px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;border-left:1px solid #e2e8f0;font-size:12px;}
+  .filter-arrow:hover{background:#f8fafc;color:#0f172a;}
+  select.filter-select{border:none;background:#fff;font-size:14px;font-weight:500;color:#0f172a;padding:0 10px;height:32px;outline:none;cursor:pointer;min-width:130px;}
+
+  /* Stat cards */
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+  .stat-card{position:relative;overflow:hidden;background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
+  .stat-card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#0ea5e9,#38bdf8,#a3c4bc,#c9b96e,#d4a843);border-radius:0 0 10px 10px;}
+  .stat-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
+  .stat-info label{font-size:11px;color:#94a3b8;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px;}
+  .stat-info .stat-num{font-size:26px;font-weight:700;color:#0f172a;line-height:1;}
+  .stat-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .icon-blue{background:#dbeafe;} .icon-purple{background:#ede9fe;} .icon-cyan{background:#cffafe;} .icon-pink{background:#fce7f3;} .icon-teal{background:#ccfbf1;} .icon-orange{background:#ffedd5;} .icon-indigo{background:#e0e7ff;} .icon-amber{background:#fef3c7;}
+
+  /* Agent stats extras */
+  .trend-up{color:#059669;font-weight:700;} .trend-down{color:#dc2626;font-weight:700;}
+  .bar-chart-svg{display:block;}
+  .agent-empty{padding:40px 16px;text-align:center;color:#94a3b8;font-size:13px;background:#fff;border-radius:10px;border:1px solid #e2e8f0;}
+
+  /* Top performers */
+  .top-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+  .top-card{position:relative;overflow:hidden;background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px 18px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
+  .top-card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#0ea5e9,#38bdf8,#a3c4bc,#c9b96e,#d4a843);border-radius:0 0 10px 10px;}
+  .top-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(139,92,246,0.12);border-color:#8b5cf6;}
+  .tc-label{font-size:10px;color:#94a3b8;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+  .tc-name{font-size:19px;font-weight:700;color:#0f172a;}
+  .tc-sub{font-size:12px;color:#94a3b8;margin-top:3px;}
+
+  /* Charts row */
+  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .chart-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 10px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
+  .chart-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(16,185,129,0.12);border-color:#10b981;}
+  .chart-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:12px;}
+
+  .donut-wrap{display:flex;gap:12px;align-items:center;}
+  .donut-svg{flex-shrink:0;width:190px;height:190px;}
+  .legend{display:flex;flex-direction:column;gap:3px;flex:1;overflow-y:auto;max-height:190px;}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#374151;}
+  .legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .legend-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .legend-val{font-weight:600;color:#0f172a;font-size:12px;}
+
+  /* Leaderboard */
+  .leaderboard-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;}
+  .lb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .lb-header h3{font-size:13px;font-weight:600;color:#0f172a;}
+  .lb-sort{font-size:11px;color:#94a3b8;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead tr{border-bottom:1px solid #e2e8f0;}
+  th{padding:6px 8px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:0.5px;text-transform:uppercase;white-space:nowrap;cursor:pointer;}
+  th:hover{color:#0ea5e9;} th.sorted{color:#0ea5e9;}
+  td{padding:7px 8px;color:#374151;border-bottom:1px solid #f8fafc;white-space:nowrap;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#f8fafc;}
+  .rank-num{font-weight:700;color:#94a3b8;}
+  .rank-1{color:#f59e0b;} .rank-2{color:#94a3b8;} .rank-3{color:#b45309;}
+  .agent-name{font-weight:600;color:#0f172a;}
+  .vob-pct{font-weight:600;}
+  .vob-high{color:#059669;} .vob-mid{color:#d97706;} .vob-low{color:#dc2626;}
+  .admit-badge{background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;}
+  .grand-total-row td{background:#f0f9ff;border-top:2px solid #0ea5e9;font-weight:700;color:#0f172a;font-size:12.5px;}
+  .grand-total-label{color:#0ea5e9;font-weight:800;letter-spacing:0.3px;}
+  .grand-total-admits{background:#0ea5e9;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;}
+
+  /* Loading/Error */
+  .loading{display:flex;align-items:center;justify-content:center;height:160px;color:#94a3b8;font-size:14px;gap:8px;}
+  .spinner{width:18px;height:18px;border:2px solid #e2e8f0;border-top-color:#0ea5e9;border-radius:50%;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .error-msg{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;color:#dc2626;font-size:13px;margin-bottom:12px;}
+
+  /* Trend arrows on stat cards */
+  .stat-trend{font-size:11px;font-weight:600;margin-top:3px;display:flex;align-items:center;gap:3px;}
+  .trend-up{color:#059669;font-weight:700;} .trend-down{color:#dc2626;font-weight:700;} .trend-flat{color:#94a3b8;font-weight:600;}
+
+  /* Funnel */
+  .funnel-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;}
+  .funnel-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:14px;}
+  .funnel-stages{display:flex;align-items:stretch;gap:0;}
+  .funnel-stage{flex:1;position:relative;}
+  .funnel-bar-wrap{height:54px;display:flex;align-items:flex-end;padding:0 6px 0 0;}
+  .funnel-bar{width:100%;border-radius:6px 6px 0 0;transition:height 0.4s ease;min-height:4px;}
+  .funnel-arrow{display:flex;align-items:center;justify-content:center;padding:4px 0;color:#94a3b8;font-size:18px;flex-shrink:0;width:22px;align-self:center;}
+  .funnel-label{font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
+  .funnel-val{font-size:20px;font-weight:700;color:#0f172a;line-height:1.1;}
+  .funnel-drop{font-size:11px;font-weight:600;margin-top:2px;}
+  .funnel-drop.drop-good{color:#059669;} .funnel-drop.drop-bad{color:#dc2626;} .funnel-drop.drop-na{color:#94a3b8;}
+  .funnel-row{display:flex;align-items:center;}
+
+  /* Trend line chart */
+  .trend-chart-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 10px;margin-bottom:12px;}
+  .trend-chart-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:10px;}
+  .trend-svg-wrap{overflow-x:auto;}
+
+  /* Goal tracker */
+  .goal-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .goal-label{font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;}
+  .goal-title{font-size:15px;font-weight:700;color:#0f172a;}
+  .goal-bar-wrap{flex:1;min-width:200px;}
+  .goal-track{background:#e2e8f0;border-radius:20px;height:18px;overflow:hidden;position:relative;}
+  .goal-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#0ea5e9,#38bdf8);transition:width 0.6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;}
+  .goal-fill-text{font-size:10px;font-weight:700;color:#fff;white-space:nowrap;}
+  .goal-stats{display:flex;gap:18px;align-items:center;flex-wrap:wrap;}
+  .goal-stat{text-align:center;}
+  .goal-stat .gval{font-size:22px;font-weight:700;color:#0f172a;line-height:1;}
+  .goal-stat .glabel{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;font-weight:600;}
+  .goal-emoji{font-size:28px;}
+
+  /* Insights / Streaks */
+  .insights-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;}
+  .insights-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:10px;}
+  .insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+  .insight-chip{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;}
+  .insight-chip .ic-icon{font-size:18px;margin-bottom:4px;}
+  .insight-chip .ic-val{font-size:16px;font-weight:700;color:#0f172a;line-height:1.2;}
+  .insight-chip .ic-label{font-size:11px;color:#94a3b8;margin-top:2px;}
+  .insight-chip.highlight{border-color:#0ea5e9;background:#f0f9ff;}
+  .insight-chip.warn{border-color:#fca5a5;background:#fff5f5;}
+  .insight-chip.good{border-color:#6ee7b7;background:#f0fdf4;}
+
+  @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(4,1fr);grid-template-rows:auto auto;}.charts-row{grid-template-columns:1fr;}}
+  @media(max-width:768px){.main{padding:12px;}.stats-grid{grid-template-columns:repeat(2,1fr);}.top-grid{grid-template-columns:1fr;}.topbar{flex-direction:column;align-items:flex-start;}.topbar-right{width:100%;}.funnel-stages{flex-direction:column;}.funnel-arrow{transform:rotate(90deg);}}
+</style>
+</head>
+<body>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <img class="brand-logo" src="data:image/png;base64,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" alt="Legacy Healing Center"/>
+      <div class="brand-text">
+        <div class="eyebrow">Agent Dashboard</div>
+        <h1>Legacy Healing Center</h1>
+      </div>
+      <nav class="topbar-nav">
+        <button class="nav-pill active" id="btn-section-team" onclick="setSection('team')">Team Stats</button>
+        <button class="nav-pill" id="btn-section-agent" onclick="setSection('agent')">Agent Stats</button>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <div class="info-box"><label>Latest Update</label><div class="info-val" id="info-latest">–</div></div>
+      <div class="info-box"><label>Active Scope</label><div class="info-val" id="info-scope">–</div></div>
+      <div class="info-box"><label>Last Synced</label><div class="info-val" id="info-synced">–</div></div>
+      <button class="btn-refresh" onclick="loadData()"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh</button>
+    </div>
+  </header>
+
+  <div class="filters">
+    <div class="view-toggle">
+      <button class="btn-toggle active" id="btn-monthly" onclick="setView('monthly')">Monthly</button>
+      <button class="btn-toggle" id="btn-alltime" onclick="setView('alltime')">All Time</button>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Year</div>
+      <div class="filter-val" id="filter-year">2026</div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Month</div>
+      <div class="filter-arrow" onclick="changeMonth(-1)">‹</div>
+      <div class="filter-val" id="filter-month">June</div>
+      <div class="filter-arrow" onclick="changeMonth(1)">›</div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Agent</div>
+      <select class="filter-select" id="filter-agent" onchange="renderAll()">
+        <option value="all">All agents</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="error-area"></div>
+
+  <div id="section-team">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-info"><label>Total Inbound Answered Calls</label><div class="stat-num" id="s-calls">—</div><div class="stat-trend" id="t-calls"></div></div><div class="stat-icon icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/><polyline points="16 2 20 6 16 10" stroke="#2563eb"/><line x1="20" y1="6" x2="12" y2="6" stroke="#2563eb"/></svg></div></div>
+      <div class="stat-card"><div class="stat-info"><label>Total Outbound Calls</label><div class="stat-num" id="s-outbound">—</div><div class="stat-trend" id="t-outbound"></div></div><div class="stat-icon icon-teal"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/><polyline points="20 6 16 10 12 6" stroke="#0d9488"/><line x1="12" y1="6" x2="20" y2="6" stroke="#0d9488"/></svg></div></div>
+      <div class="stat-card"><div class="stat-info"><label>Total Calls VOB</label><div class="stat-num" id="s-calls-vob">—</div><div class="stat-trend" id="t-calls-vob"></div></div><div class="stat-icon icon-indigo"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div></div>
+      <div class="stat-card"><div class="stat-info"><label>Total Chats VOB</label><div class="stat-num" id="s-chats-vob">—</div><div class="stat-trend" id="t-chats-vob"></div></div><div class="stat-icon icon-amber"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg></div></div>
+      <div class="stat-card"><div class="stat-info"><label>Total VOB from Calls and Chats</label><div class="stat-num" id="s-vobs">—</div><div class="stat-trend" id="t-vobs"></div></div><div class="stat-icon icon-purple"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div></div>
+      <div class="stat-card"><div class="stat-info"><label>Total Admits from Calls</label><div class="stat-num" id="s-admits-calls">—</div><div class="stat-trend" id="t-admits-calls"></div></div><div class="stat-icon icon-cyan"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div></div>
+      <div class="stat-card"><div class="stat-info"><label>Total Admits Chats</label><div class="stat-num" id="s-admits-chats">—</div><div class="stat-trend" id="t-admits-chats"></div></div><div class="stat-icon icon-pink"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg></div></div>
+      <div class="stat-card"><div class="stat-info"><label>Total Admits from Calls and Chats</label><div class="stat-num" id="s-admits-total">—</div><div class="stat-trend" id="t-admits-total"></div></div><div class="stat-icon icon-orange"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div></div>
+    </div>
+
+    <div class="top-grid">
+      <div class="top-card"><div class="tc-label">Top Calls VOB Generator</div><div class="tc-name" id="top-calls-vob-name">—</div><div class="tc-sub" id="top-calls-vob-sub">—</div></div>
+      <div class="top-card"><div class="tc-label">Top Chats VOB Generator</div><div class="tc-name" id="top-chats-vob-name">—</div><div class="tc-sub" id="top-chats-vob-sub">—</div></div>
+      <div class="top-card"><div class="tc-label">Top Admit</div><div class="tc-name" id="top-admit-name">—</div><div class="tc-sub" id="top-admit-sub">—</div></div>
+    </div>
+
+    <!-- Goal Tracker -->
+    <div class="goal-card" id="goal-card">
+      <div>
+        <div class="goal-label">Monthly Target</div>
+        <div class="goal-title">🎯 Admit Goal Tracker</div>
+      </div>
+      <div class="goal-bar-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+          <span style="font-size:12px;color:#64748b;font-weight:600;" id="goal-bar-label">0 / 30 admits</span>
+          <span style="font-size:11px;color:#94a3b8;" id="goal-pct-label">0%</span>
+        </div>
+        <div class="goal-track">
+          <div class="goal-fill" id="goal-fill" style="width:0%">
+            <span class="goal-fill-text" id="goal-fill-text"></span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:4px;" id="goal-subtext">—</div>
+      </div>
+      <div class="goal-stats">
+        <div class="goal-stat"><div class="gval" id="goal-current">—</div><div class="glabel">This Month</div></div>
+        <div class="goal-stat"><div class="gval" id="goal-remaining">—</div><div class="glabel">Remaining</div></div>
+        <div class="goal-stat"><div class="gval" id="goal-target">30</div><div class="glabel">Target</div></div>
+        <div class="goal-emoji" id="goal-emoji">⏳</div>
+      </div>
+    </div>
+
+    <!-- Conversion Funnel -->
+    <div class="funnel-card" id="funnel-card">
+      <h3>📊 Conversion Funnel — <span id="funnel-period">June 2026</span></h3>
+      <div class="funnel-row">
+        <div class="funnel-stage">
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="funnel-bar-calls" style="background:#3b82f6;height:54px;"></div></div>
+          <div style="padding:8px 0 0 0;">
+            <div class="funnel-label">Total Calls</div>
+            <div class="funnel-val" id="funnel-calls">—</div>
+            <div class="funnel-drop drop-na" id="funnel-drop-calls">baseline</div>
+          </div>
+        </div>
+        <div class="funnel-arrow">›</div>
+        <div class="funnel-stage">
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="funnel-bar-vob" style="background:#8b5cf6;height:30px;"></div></div>
+          <div style="padding:8px 0 0 0;">
+            <div class="funnel-label">Total VOBs</div>
+            <div class="funnel-val" id="funnel-vobs">—</div>
+            <div class="funnel-drop" id="funnel-drop-vob">—</div>
+          </div>
+        </div>
+        <div class="funnel-arrow">›</div>
+        <div class="funnel-stage">
+          <div class="funnel-bar-wrap"><div class="funnel-bar" id="funnel-bar-admits" style="background:#10b981;height:10px;"></div></div>
+          <div style="padding:8px 0 0 0;">
+            <div class="funnel-label">Total Admits</div>
+            <div class="funnel-val" id="funnel-admits">—</div>
+            <div class="funnel-drop" id="funnel-drop-admits">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Trend Over Time -->
+    <div class="trend-chart-card" id="trend-chart-card">
+      <h3>📈 Team Performance Over Time (All Months)</h3>
+      <div class="trend-svg-wrap">
+        <svg id="trend-line-chart" style="display:block;"></svg>
+      </div>
+      <div style="display:flex;gap:18px;margin-top:8px;justify-content:center;flex-wrap:wrap;">
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Total Calls</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div><span>Total VOBs</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span>Total Admits</span></div>
+      </div>
+    </div>
+
+    <!-- Insights & Streaks -->
+    <div class="insights-card" id="insights-card">
+      <h3>🔍 Team Insights &amp; Consistency</h3>
+      <div class="insights-grid" id="insights-grid">
+        <div class="insight-chip"><div class="ic-icon">⏳</div><div class="ic-val">Loading…</div><div class="ic-label">Calculating insights</div></div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3 id="admits-chart-title">Admits by Agent</h3>
+        <div class="donut-wrap">
+          <svg class="donut-svg" id="donut-admits" viewBox="0 0 180 180"></svg>
+          <div class="legend" id="legend-admits"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 id="vob-chart-title">VOB Rate by Agent</h3>
+        <div class="donut-wrap">
+          <svg class="donut-svg" id="donut-vob" viewBox="0 0 180 180"></svg>
+          <div class="legend" id="legend-vob"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="leaderboard-card">
+      <div class="lb-header">
+        <h3><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><polyline points="8 6 2 6 2 12"/><path d="M2 12a10 10 0 0 0 20 0"/><polyline points="16 6 22 6 22 12"/><line x1="12" y1="22" x2="12" y2="17"/><line x1="8" y1="22" x2="16" y2="22"/></svg>Leaderboard — <span id="lb-period">June 2026</span></h3>
+        <div class="lb-sort" id="lb-sort-label">Ranked by Total Admits ↓ · VOB Rate ↓ (tiebreaker) · Click column to re-rank</div>
+      </div>
+      <div id="table-wrap"><div class="loading"><div class="spinner"></div> Loading data from Google Sheets...</div></div>
+    </div>
+  </div>
+
+  <div id="section-agent" style="display:none">
+    <div id="agent-empty" class="agent-empty" style="display:none">
+      Select a specific agent from the filter above to view their individual performance.
+    </div>
+    <div id="agent-content">
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-card"><div class="stat-info"><label id="a-calls-label">Total Calls</label><div class="stat-num" id="a-calls">0</div></div><div class="stat-icon icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label>Calls VOB</label><div class="stat-num" id="a-callsvob">0</div></div><div class="stat-icon icon-purple"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label id="a-vobpct-label">Avg VOB %</label><div class="stat-num" id="a-vobpct">0.0%</div></div><div class="stat-icon icon-orange"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label>Total Admits</label><div class="stat-num" id="a-admits">0</div></div><div class="stat-icon icon-teal"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div>
+      </div>
+
+      <div class="top-grid">
+        <div class="top-card"><div class="tc-label">🏆 Team Rank — Total Admits</div><div class="tc-name" id="a-rank">—</div><div class="tc-sub" id="a-rank-sub">—</div></div>
+        <div class="top-card"><div class="tc-label">📈 Calls vs Previous Month</div><div class="tc-name" id="a-trend">—</div><div class="tc-sub" id="a-trend-sub">—</div></div>
+        <div class="top-card"><div class="tc-label">⭐ Best Month — All Time</div><div class="tc-name" id="a-best">—</div><div class="tc-sub" id="a-best-sub">—</div></div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:12px;">
+        <h3>Monthly Performance (All Time)</h3>
+        <div style="overflow-x:auto;">
+          <svg id="agent-bar-chart" class="bar-chart-svg"></svg>
+        </div>
+        <div class="legend" style="flex-direction:row;flex-wrap:wrap;gap:14px;margin-top:10px;justify-content:center;max-height:none;">
+          <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span class="legend-name">Total Calls</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div><span class="legend-name">Calls VOB</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span class="legend-name">Chats VOB</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span class="legend-name">Total Admits</span></div>
+        </div>
+      </div>
+
+      <div class="leaderboard-card">
+        <div class="lb-header">
+          <h3>Month-by-Month Breakdown — <span id="agent-name-display">—</span></h3>
+        </div>
+        <div id="agent-table-wrap"><div class="loading"><div class="spinner"></div> Loading data...</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API_KEY = 'AIzaSyDyOwIurmPpHRv-xRPlo87TO-l_lc1cZD4';
+const SHEET_ID = '1xyJ0otJkqksJAazO3QJRVwCwvnplM0h5Ewn1kyUObkE';
+const RANGE = 'AGENT VOB ADMITS MTD!A:L';
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const COLORS = ['#3ca4cb', '#80cfe9', '#cab16e', '#d99573', '#b35e59', '#8bbfd5', '#708290', '#5f9ec1', '#a0c4d8', '#c9a870', '#e8a87c', '#7a9eb5', '#8faa7c', '#c4785a'];
+
+let allData=[], currentMonth='June', currentYear='2026', currentView='monthly', sortCol='totalAdmits', sortDir=1, currentSection='team', _firstLoad=true;
+
+function setView(v){
+  currentView=v;
+  document.getElementById('btn-monthly').className='btn-toggle'+(v==='monthly'?' active':'');
+  document.getElementById('btn-alltime').className='btn-toggle'+(v==='alltime'?' active':'');
+  renderAll();
+}
+
+function setSection(s){
+  currentSection=s;
+  document.getElementById('btn-section-team').className='nav-pill'+(s==='team'?' active':'');
+  document.getElementById('btn-section-agent').className='nav-pill'+(s==='agent'?' active':'');
+  document.getElementById('section-team').style.display=s==='team'?'':'none';
+  document.getElementById('section-agent').style.display=s==='agent'?'':'none';
+  renderAll();
+}
+
+function changeMonth(dir){
+  const idx=MONTHS.indexOf(currentMonth);
+  currentMonth=MONTHS[(idx+dir+12)%12];
+  document.getElementById('filter-month').textContent=currentMonth;
+  renderAll();
+}
+
+async function loadData(){
+  if(_firstLoad){
+    document.getElementById('table-wrap').innerHTML='<div class="loading"><div class="spinner"></div> Fetching from Google Sheets...</div>';
+  }
+  document.getElementById('error-area').innerHTML='';
+  const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(RANGE)}?key=${API_KEY}`;
+  try{
+    const res=await fetch(url);
+    if(!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
+    const json=await res.json();
+    const rows=json.values||[];
+    allData=rows.slice(1).filter(r=>r.length>1).map(r=>({
+      month:r[0]||'',name:r[1]||'',
+      totalCalls:parseNum(r[2]),callsVOB:parseNum(r[3]),chatsVOB:parseNum(r[4]),
+      vobPct:parseFloat((r[5]||'0').replace('%',''))||0,
+      admitCalls:parseNum(r[6]),admitChats:parseNum(r[7]),totalAdmits:parseNum(r[8]),
+      transfers:parseNum(r[9]),aht:r[10]||'0:00:00',outbound:parseNum(r[11])
+    }));
+    const agents=[...new Set(allData.map(d=>d.name))].sort();
+    const sel=document.getElementById('filter-agent');
+    sel.innerHTML='<option value="all">All agents</option>'+agents.map(a=>`<option value="${a}">${a}</option>`).join('');
+    const now=new Date();
+    _firstLoad=false;
+    document.getElementById('info-latest').textContent=now.toLocaleDateString();
+    document.getElementById('info-synced').textContent='Just now';
+    let countdown=59;
+    clearInterval(window._countdownTimer);
+    window._countdownTimer=setInterval(()=>{
+      countdown--;
+      if(countdown<=0){clearInterval(window._countdownTimer);return;}
+      document.getElementById('info-synced').textContent=`${countdown}s ago`;
+    },1000);
+    renderAll();
+  }catch(e){
+    document.getElementById('error-area').innerHTML=`<div class="error-msg">⚠️ Could not load data: ${e.message}</div>`;
+    document.getElementById('table-wrap').innerHTML='';
+  }
+}
+
+function parseNum(v){return parseInt((v||'0').replace(/,/g,''))||0;}
+
+function filteredData(){
+  let d=allData;
+  if(currentView==='monthly') d=d.filter(r=>{const p=r.month.trim().split(' ');return p[0]===currentMonth&&p[1]===currentYear;});
+  const ag=document.getElementById('filter-agent').value;
+  if(ag!=='all') d=d.filter(r=>r.name===ag);
+  if(currentView==='alltime') d=aggregateByAgent(d);
+  return d;
+}
+
+function ahtToSeconds(aht){
+  const parts=(aht||'0:00:00').split(':').map(Number);
+  if(parts.length===3) return (parts[0]*3600)+(parts[1]*60)+parts[2];
+  if(parts.length===2) return (parts[0]*60)+parts[1];
+  return 0;
+}
+
+function secondsToAht(sec){
+  sec=Math.round(sec)||0;
+  const h=Math.floor(sec/3600);
+  const m=Math.floor((sec%3600)/60);
+  const s=sec%60;
+  return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+// Collapse multiple month rows per agent into a single all-time totals row
+function aggregateByAgent(data){
+  const map=new Map();
+  data.forEach(r=>{
+    if(!map.has(r.name)){
+      map.set(r.name,{
+        name:r.name,totalCalls:0,outbound:0,callsVOB:0,chatsVOB:0,
+        admitCalls:0,admitChats:0,totalAdmits:0,transfers:0,_ahtSecTotal:0
+      });
+    }
+    const a=map.get(r.name);
+    a.totalCalls+=r.totalCalls;
+    a.outbound+=r.outbound;
+    a.callsVOB+=r.callsVOB;
+    a.chatsVOB+=r.chatsVOB;
+    a.admitCalls+=r.admitCalls;
+    a.admitChats+=r.admitChats;
+    a.totalAdmits+=r.totalAdmits;
+    a.transfers+=r.transfers;
+    a._ahtSecTotal+=ahtToSeconds(r.aht)*r.totalCalls;
+  });
+  return [...map.values()].map(a=>{
+    a.vobPct=a.totalCalls>0?(a.callsVOB/a.totalCalls*100):0;
+    a.aht=a.totalCalls>0?secondsToAht(a._ahtSecTotal/a.totalCalls):'0:00:00';
+    delete a._ahtSecTotal;
+    return a;
+  });
+}
+
+function renderAll(){
+  const data=filteredData();
+  const period=currentView==='monthly'?`${currentMonth} ${currentYear}`:'All Time';
+  const totCalls=data.reduce((s,r)=>s+r.totalCalls,0);
+  const totOutbound=data.reduce((s,r)=>s+r.outbound,0);
+  const totCallsVOB=data.reduce((s,r)=>s+r.callsVOB,0);
+  const totChatsVOB=data.reduce((s,r)=>s+r.chatsVOB,0);
+  const totVOB=data.reduce((s,r)=>s+r.callsVOB+r.chatsVOB,0);
+  const totAdmitCalls=data.reduce((s,r)=>s+r.admitCalls,0);
+  const totAdmitChats=data.reduce((s,r)=>s+r.admitChats,0);
+  const totAdmits=data.reduce((s,r)=>s+r.totalAdmits,0);
+
+  document.getElementById('s-calls').textContent=totCalls.toLocaleString();
+  document.getElementById('s-outbound').textContent=totOutbound.toLocaleString();
+  document.getElementById('s-calls-vob').textContent=totCallsVOB.toLocaleString();
+  document.getElementById('s-chats-vob').textContent=totChatsVOB.toLocaleString();
+  document.getElementById('s-vobs').textContent=totVOB.toLocaleString();
+  document.getElementById('s-admits-calls').textContent=totAdmitCalls;
+  document.getElementById('s-admits-chats').textContent=totAdmitChats;
+  document.getElementById('s-admits-total').textContent=totAdmits;
+
+  // Month-over-month trend arrows on summary cards
+  renderCardTrends(totCalls,totOutbound,totCallsVOB,totChatsVOB,totVOB,totAdmitCalls,totAdmitChats,totAdmits);
+
+  const byCallsVOB=[...data].sort((a,b)=>b.callsVOB-a.callsVOB)[0];
+  const byChatsVOB=[...data].sort((a,b)=>b.chatsVOB-a.chatsVOB)[0];
+  const byAdmits=[...data].sort((a,b)=>b.totalAdmits-a.totalAdmits)[0];
+  set('top-calls-vob-name',byCallsVOB?.name||'—');
+  set('top-calls-vob-sub',byCallsVOB?`${byCallsVOB.callsVOB} Calls VOB`:'');
+  set('top-chats-vob-name',byChatsVOB?.name||'—');
+  set('top-chats-vob-sub',byChatsVOB?`${byChatsVOB.chatsVOB} Chats VOB`:'');
+  set('top-admit-name',byAdmits?.name||'—');
+  set('top-admit-sub',byAdmits?`${byAdmits.totalAdmits} Total Admits`:'');
+  set('admits-chart-title',`Admits by Agent — ${period}`);
+  set('vob-chart-title',`VOB Rate by Agent — ${period}`);
+  set('lb-period',period);
+  set('info-scope',period);
+
+  // New panels
+  renderGoalTracker(totAdmits);
+  renderFunnel(totCalls,totVOB,totAdmits,period);
+  renderTrendLineChart();
+  renderInsights();
+
+  renderDonutAdmits(data,totAdmits);
+  renderDonutVOB(data);
+  renderTable(data);
+
+  if(currentSection==='agent') renderAgentSection();
+}
+
+// ── Trend arrows on summary cards ──────────────────────────────────────────
+function renderCardTrends(calls,outbound,cvob,chvob,vob,ac,ach,admits){
+  if(currentView!=='monthly'){
+    ['t-calls','t-outbound','t-calls-vob','t-chats-vob','t-vobs','t-admits-calls','t-admits-chats','t-admits-total'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.innerHTML='';
+    });
+    return;
+  }
+  const mIdx=MONTHS.indexOf(currentMonth);
+  const prevMonth=MONTHS[(mIdx-1+12)%12];
+  const prevYear=(mIdx===0)?String(parseInt(currentYear)-1):currentYear;
+  const prev=allData.filter(r=>{const p=r.month.trim().split(' ');return p[0]===prevMonth&&p[1]===prevYear;});
+  if(!prev.length) return;
+  const p={
+    calls:prev.reduce((s,r)=>s+r.totalCalls,0),
+    outbound:prev.reduce((s,r)=>s+r.outbound,0),
+    cvob:prev.reduce((s,r)=>s+r.callsVOB,0),
+    chvob:prev.reduce((s,r)=>s+r.chatsVOB,0),
+    vob:prev.reduce((s,r)=>s+r.callsVOB+r.chatsVOB,0),
+    ac:prev.reduce((s,r)=>s+r.admitCalls,0),
+    ach:prev.reduce((s,r)=>s+r.admitChats,0),
+    admits:prev.reduce((s,r)=>s+r.totalAdmits,0)
+  };
+  const pairs=[
+    ['t-calls',calls,p.calls],['t-outbound',outbound,p.outbound],
+    ['t-calls-vob',cvob,p.cvob],['t-chats-vob',chvob,p.chvob],
+    ['t-vobs',vob,p.vob],['t-admits-calls',ac,p.ac],
+    ['t-admits-chats',ach,p.ach],['t-admits-total',admits,p.admits]
+  ];
+  pairs.forEach(([id,cur,prev2])=>{
+    const el=document.getElementById(id); if(!el) return;
+    if(prev2===0){el.innerHTML=`<span class="trend-flat">— vs ${prevMonth}</span>`;return;}
+    const pct=((cur-prev2)/prev2*100).toFixed(0);
+    const up=cur>=prev2;
+    const cls=up?'trend-up':'trend-down';
+    const arrow=up?'▲':'▼';
+    el.innerHTML=`<span class="${cls}">${arrow}${Math.abs(pct)}% vs ${prevMonth}</span>`;
+  });
+}
+
+// ── Goal Tracker ────────────────────────────────────────────────────────────
+const MONTHLY_ADMIT_TARGET=30;
+function renderGoalTracker(admits){
+  const gc=document.getElementById('goal-card');
+  if(!gc) return;
+  // Only show in monthly view
+  if(currentView!=='monthly'){gc.style.display='none';return;}
+  gc.style.display='flex';
+  const pct=Math.min(Math.round((admits/MONTHLY_ADMIT_TARGET)*100),100);
+  const remaining=Math.max(MONTHLY_ADMIT_TARGET-admits,0);
+  document.getElementById('goal-fill').style.width=pct+'%';
+  document.getElementById('goal-bar-label').textContent=`${admits} / ${MONTHLY_ADMIT_TARGET} admits`;
+  document.getElementById('goal-pct-label').textContent=pct+'%';
+  document.getElementById('goal-fill-text').textContent=pct>=15?pct+'%':'';
+  document.getElementById('goal-current').textContent=admits;
+  document.getElementById('goal-remaining').textContent=remaining;
+  document.getElementById('goal-target').textContent=MONTHLY_ADMIT_TARGET;
+  let emoji='⏳',sub='';
+  if(admits===0){emoji='😴';sub='No admits recorded yet this month';}
+  else if(admits>=MONTHLY_ADMIT_TARGET){emoji='🏆';sub='Goal crushed! Outstanding month!';}
+  else if(pct>=75){emoji='🔥';sub=`Almost there — ${remaining} more to hit the target!`;}
+  else if(pct>=50){emoji='💪';sub=`Halfway there — ${remaining} admits to go!`;}
+  else{emoji='⏳';sub=`${remaining} admits needed to reach the ${MONTHLY_ADMIT_TARGET}-admit goal`;}
+  document.getElementById('goal-emoji').textContent=emoji;
+  document.getElementById('goal-subtext').textContent=sub;
+  // Color shift when goal met
+  document.getElementById('goal-fill').style.background=admits>=MONTHLY_ADMIT_TARGET?
+    'linear-gradient(90deg,#059669,#34d399)':'linear-gradient(90deg,#0ea5e9,#38bdf8)';
+}
+
+// ── Conversion Funnel ───────────────────────────────────────────────────────
+function renderFunnel(calls,vobs,admits,period){
+  const fc=document.getElementById('funnel-card');
+  if(!fc) return;
+  set('funnel-period',period);
+  set('funnel-calls',calls.toLocaleString());
+  set('funnel-vobs',vobs.toLocaleString());
+  set('funnel-admits',admits.toLocaleString());
+  const maxH=54;
+  const vobBar=calls>0?Math.max((vobs/calls)*maxH,4):4;
+  const adBar=calls>0?Math.max((admits/calls)*maxH,4):4;
+  document.getElementById('funnel-bar-vob').style.height=vobBar+'px';
+  document.getElementById('funnel-bar-admits').style.height=adBar+'px';
+  // Drop-off rates
+  const vobRate=calls>0?(vobs/calls*100):0;
+  const adFromVOB=vobs>0?(admits/vobs*100):0;
+  const dv=document.getElementById('funnel-drop-vob');
+  const da=document.getElementById('funnel-drop-admits');
+  if(calls>0){
+    dv.textContent=`${vobRate.toFixed(1)}% VOB rate`;
+    dv.className='funnel-drop '+(vobRate>=4?'drop-good':'drop-bad');
+  }else{dv.textContent='—';dv.className='funnel-drop drop-na';}
+  if(vobs>0){
+    da.textContent=`${adFromVOB.toFixed(1)}% close rate`;
+    da.className='funnel-drop '+(adFromVOB>=20?'drop-good':'drop-bad');
+  }else{da.textContent='—';da.className='funnel-drop drop-na';}
+}
+
+// ── Team Performance Trend Line Chart ───────────────────────────────────────
+function renderTrendLineChart(){
+  const svg=document.getElementById('trend-line-chart');
+  if(!svg) return;
+  // Aggregate by month across all agents
+  const monthMap=new Map();
+  allData.forEach(r=>{
+    const key=r.month.trim();
+    if(!key) return;
+    if(!monthMap.has(key)) monthMap.set(key,{calls:0,vob:0,admits:0});
+    const m=monthMap.get(key);
+    m.calls+=r.totalCalls;
+    m.vob+=r.callsVOB+r.chatsVOB;
+    m.admits+=r.totalAdmits;
+  });
+  // Sort chronologically
+  const sorted=[...monthMap.entries()].map(([k,v])=>{
+    const p=k.split(' ');
+    return{label:k,shortLabel:(p[0]||'').slice(0,3)+' '+(p[1]||'').slice(2),
+      monthIdx:MONTHS.indexOf(p[0]),yearNum:parseInt(p[1])||0,...v};
+  }).sort((a,b)=>(a.yearNum-b.yearNum)||(a.monthIdx-b.monthIdx));
+  if(sorted.length<2){svg.innerHTML='<text x="10" y="30" fill="#94a3b8" font-size="12">Not enough monthly data yet</text>';return;}
+  const W=Math.max(500,sorted.length*80+80), H=200, padL=44,padR=16,padT=16,padB=36;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const maxVal=Math.max(...sorted.map(m=>m.calls),1);
+  const niceM=niceCeil(maxVal);
+  const xStep=plotW/(sorted.length-1);
+  const yScale=v=>(v/niceM)*plotH;
+  const px=(i)=>padL+i*xStep;
+  const py=(v)=>padT+plotH-yScale(v);
+  let grid='',axes='',lines='',dots='',xlabels='',ylabels='';
+  for(let i=0;i<=4;i++){
+    const v=niceM*i/4;
+    const y=py(v);
+    grid+=`<line x1="${padL}" x2="${W-padR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3,3"/>`;
+    ylabels+=`<text x="${padL-6}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="10" fill="#94a3b8">${Math.round(v)}</text>`;
+  }
+  axes=`<line x1="${padL}" x2="${padL}" y1="${padT}" y2="${padT+plotH}" stroke="#cbd5e1"/>
+    <line x1="${padL}" x2="${W-padR}" y1="${padT+plotH}" y2="${padT+plotH}" stroke="#cbd5e1"/>`;
+  const series=[
+    {key:'calls',color:'#3b82f6',fill:'rgba(59,130,246,0.08)'},
+    {key:'vob',color:'#8b5cf6',fill:'rgba(139,92,246,0.08)'},
+    {key:'admits',color:'#10b981',fill:'rgba(16,185,129,0.12)'}
+  ];
+  series.forEach(s=>{
+    const pts=sorted.map((m,i)=>`${px(i).toFixed(1)},${py(m[s.key]).toFixed(1)}`).join(' ');
+    const firstPt=`${px(0).toFixed(1)},${py(sorted[0][s.key]).toFixed(1)}`;
+    const lastPt=`${px(sorted.length-1).toFixed(1)},${py(sorted[sorted.length-1][s.key]).toFixed(1)}`;
+    const fillPoly=`${firstPt} ${pts} ${lastPt} ${px(sorted.length-1).toFixed(1)},${(padT+plotH)} ${px(0).toFixed(1)},${padT+plotH}`;
+    lines+=`<polygon points="${fillPoly}" fill="${s.fill}" stroke="none"/>`;
+    lines+=`<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    sorted.forEach((m,i)=>{
+      dots+=`<circle cx="${px(i).toFixed(1)}" cy="${py(m[s.key]).toFixed(1)}" r="3.5" fill="${s.color}" stroke="#fff" stroke-width="1.5">
+        <title>${m.label}: ${m[s.key]}</title></circle>`;
+    });
+  });
+  sorted.forEach((m,i)=>{
+    xlabels+=`<text x="${px(i).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#64748b">${m.shortLabel}</text>`;
+  });
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('width',W);
+  svg.setAttribute('height',H);
+  svg.innerHTML=grid+axes+ylabels+lines+dots+xlabels;
+}
+
+// ── Insights & Streaks ──────────────────────────────────────────────────────
+function renderInsights(){
+  const grid=document.getElementById('insights-grid');
+  if(!grid) return;
+  if(!allData.length){grid.innerHTML='<div class="insight-chip"><div class="ic-icon">⏳</div><div class="ic-val">Waiting for data</div></div>';return;}
+
+  const mIdx=MONTHS.indexOf(currentMonth);
+  const curMonthData=allData.filter(r=>{const p=r.month.trim().split(' ');return p[0]===currentMonth&&p[1]===currentYear;});
+  const prevMonth=MONTHS[(mIdx-1+12)%12];
+  const prevYear=(mIdx===0)?String(parseInt(currentYear)-1):currentYear;
+  const prevMonthData=allData.filter(r=>{const p=r.month.trim().split(' ');return p[0]===prevMonth&&p[1]===prevYear;});
+
+  const chips=[];
+
+  // Agents with 0 VOBs this month
+  const agentsZeroVOB=curMonthData.filter(r=>(r.callsVOB+r.chatsVOB)===0);
+  if(agentsZeroVOB.length>0){
+    chips.push({cls:'warn',icon:'⚠️',val:`${agentsZeroVOB.length} agent${agentsZeroVOB.length>1?'s':''}`,
+      label:`hit 0 VOBs this month (${agentsZeroVOB.map(r=>r.name.split(' ')[0]).join(', ')})`});
+  }else if(curMonthData.length>0){
+    chips.push({cls:'good',icon:'✅',val:'All agents',label:'recorded at least 1 VOB this month'});
+  }
+
+  // Top performer this month
+  const topAdmitter=[...curMonthData].sort((a,b)=>b.totalAdmits-a.totalAdmits)[0];
+  if(topAdmitter && topAdmitter.totalAdmits>0){
+    chips.push({cls:'good',icon:'🏆',val:topAdmitter.name,label:`leads with ${topAdmitter.totalAdmits} admits this month`});
+  }
+
+  // Most improved admits vs last month
+  if(curMonthData.length && prevMonthData.length){
+    let bestGain=null,bestGainVal=-Infinity;
+    curMonthData.forEach(r=>{
+      const prev=prevMonthData.find(p=>p.name===r.name);
+      if(prev){
+        const gain=r.totalAdmits-prev.totalAdmits;
+        if(gain>bestGainVal){bestGainVal=gain;bestGain=r;}
+      }
+    });
+    if(bestGain && bestGainVal>0){
+      chips.push({cls:'highlight',icon:'📈',val:bestGain.name,label:`most improved: +${bestGainVal} admits vs ${prevMonth}`});
+    }
+  }
+
+  // Longest admit streak: agent with admits in most consecutive months
+  const agentNames=[...new Set(allData.map(r=>r.name))];
+  let longestStreakAgent='',longestStreak=0;
+  agentNames.forEach(name=>{
+    const rows=allData.filter(r=>r.name===name).map(r=>{
+      const p=r.month.trim().split(' ');
+      return{monthIdx:MONTHS.indexOf(p[0]),yearNum:parseInt(p[1])||0,admits:r.totalAdmits};
+    }).sort((a,b)=>(a.yearNum-b.yearNum)||(a.monthIdx-b.monthIdx));
+    let streak=0,maxS=0;
+    rows.forEach(r=>{if(r.admits>0){streak++;maxS=Math.max(maxS,streak);}else{streak=0;}});
+    if(maxS>longestStreak){longestStreak=maxS;longestStreakAgent=name;}
+  });
+  if(longestStreakAgent && longestStreak>1){
+    chips.push({cls:'highlight',icon:'🔥',val:longestStreakAgent,label:`${longestStreak}-month admit streak (all-time)`});
+  }
+
+  // Agent with highest VOB rate this month
+  const topVOB=[...curMonthData].filter(r=>r.totalCalls>0).sort((a,b)=>b.vobPct-a.vobPct)[0];
+  if(topVOB){
+    chips.push({cls:'good',icon:'📋',val:topVOB.name,label:`highest VOB rate: ${topVOB.vobPct.toFixed(1)}% this month`});
+  }
+
+  // Best team admits month ever
+  const monthTotals=new Map();
+  allData.forEach(r=>{
+    const k=r.month.trim();
+    monthTotals.set(k,(monthTotals.get(k)||0)+r.totalAdmits);
+  });
+  let bestMonth='',bestMonthVal=0;
+  monthTotals.forEach((v,k)=>{if(v>bestMonthVal){bestMonthVal=v;bestMonth=k;}});
+  if(bestMonth){
+    chips.push({cls:'highlight',icon:'🌟',val:`${bestMonthVal} admits`,label:`best team month ever (${bestMonth})`});
+  }
+
+  if(!chips.length){chips.push({cls:'',icon:'📊',val:'More data needed',label:'insights will appear as months accumulate'});}
+
+  grid.innerHTML=chips.map(c=>`<div class="insight-chip ${c.cls||''}">
+    <div class="ic-icon">${c.icon}</div>
+    <div class="ic-val">${c.val}</div>
+    <div class="ic-label">${c.label}</div>
+  </div>`).join('');
+}
+
+
+
+function set(id,txt){const el=document.getElementById(id);if(el)el.textContent=txt;}
+
+function buildDonut(svgId,legendId,items,centerVal,centerLabel){
+  const svg=document.getElementById(svgId);
+  const legend=document.getElementById(legendId);
+  if(!items.length){
+    svg.innerHTML='<text x="90" y="94" text-anchor="middle" fill="#94a3b8" font-size="11">No data</text>';
+    legend.innerHTML='';return;
+  }
+  const cx=90,cy=90,r=70,ir=44;
+  const total=items.reduce((s,i)=>s+i.val,0);
+  let angle=-Math.PI/2,paths='';
+  items.forEach((item,i)=>{
+    const slice=(item.val/total)*2*Math.PI;
+    if(slice<0.001){angle+=slice;return;}
+    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(angle+slice),y2=cy+r*Math.sin(angle+slice);
+    const xi1=cx+ir*Math.cos(angle),yi1=cy+ir*Math.sin(angle);
+    const xi2=cx+ir*Math.cos(angle+slice),yi2=cy+ir*Math.sin(angle+slice);
+    const large=slice>Math.PI?1:0;
+    paths+=`<path d="M${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${xi2.toFixed(2)},${yi2.toFixed(2)} A${ir},${ir} 0 ${large},0 ${xi1.toFixed(2)},${yi1.toFixed(2)} Z" fill="${COLORS[i%COLORS.length]}" stroke="#fff" stroke-width="1.5"/>`;
+    angle+=slice;
+  });
+  svg.innerHTML=paths+
+    `<text x="90" y="87" text-anchor="middle" fill="#0f172a" font-size="21" font-weight="700">${centerVal}</text>`+
+    `<text x="90" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">${centerLabel}</text>`;
+  legend.innerHTML=items.map((item,i)=>
+    `<div class="legend-item"><div class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></div><span class="legend-name">${item.name}</span><span class="legend-val">${item.display}</span></div>`
+  ).join('');
+}
+
+function renderDonutAdmits(data,total){
+  const items=data.filter(d=>d.totalAdmits>0).sort((a,b)=>b.totalAdmits-a.totalAdmits)
+    .map(d=>({name:d.name,val:d.totalAdmits,display:d.totalAdmits}));
+  buildDonut('donut-admits','legend-admits',items,total,'Total Admits');
+}
+
+function renderDonutVOB(data){
+  const items=data.filter(d=>d.vobPct>0).sort((a,b)=>b.vobPct-a.vobPct)
+    .map(d=>({name:d.name,val:d.vobPct,display:d.vobPct.toFixed(1)+'%'}));
+  const totVOBs=data.reduce((s,d)=>s+d.callsVOB,0);
+  const totCalls=data.reduce((s,d)=>s+d.totalCalls,0);
+  const teamVOB=totCalls>0?((totVOBs/totCalls)*100).toFixed(2)+'%':'—';
+  buildDonut('donut-vob','legend-vob',items,teamVOB,'Team VOB Rate');
+}
+
+function renderTable(data){
+  updateSortLabel();
+  const sorted=[...data].sort((a,b)=>{
+    // Default composite sort: Total Admits desc → VOB Rate desc as tiebreaker
+    if(sortCol==='totalAdmits'){
+      const admitDiff = (b.totalAdmits - a.totalAdmits) * sortDir;
+      if(admitDiff !== 0) return admitDiff;
+      return (b.vobPct - a.vobPct) * sortDir; // higher VOB wins the tie
+    }
+    return (b[sortCol]-a[sortCol])*sortDir;
+  });
+  const cols=[
+    {key:'#',label:'#',render:(r,i)=>`<span class="rank-num ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}</span>`},
+    {key:'name',label:'Agent',render:r=>`<span class="agent-name">${r.name}</span>`},
+    {key:'totalCalls',label:'Calls',render:r=>r.totalCalls.toLocaleString()},
+    {key:'outbound',label:'Outbound',render:r=>r.outbound.toLocaleString()},
+    {key:'transfers',label:'Transfers',render:r=>r.transfers},
+    {key:'aht',label:'AHT',render:r=>r.aht},
+    {key:'callsVOB',label:'Calls VOB',render:r=>r.callsVOB},
+    {key:'chatsVOB',label:'Chats VOB',render:r=>r.chatsVOB},
+    {key:'vobPct',label:'VOB Rate',render:r=>`<span class="vob-pct ${r.vobPct>=4?'vob-high':r.vobPct>=2?'vob-mid':'vob-low'}">${r.vobPct.toFixed(2)}%</span>`},
+    {key:'admitCalls',label:'Admits (C)',render:r=>r.admitCalls||''},
+    {key:'admitChats',label:'Admits (CH)',render:r=>r.admitChats||''},
+    {key:'totalAdmits',label:'Total Admits',render:r=>r.totalAdmits?`<span class="admit-badge">${r.totalAdmits}</span>`:''},
+  ];
+  if(!sorted.length){document.getElementById('table-wrap').innerHTML='<div style="padding:16px;color:#94a3b8;font-size:12px;">No data for this period.</div>';return;}
+
+  // Compute grand totals
+  const gt = {
+    totalCalls: sorted.reduce((s,r)=>s+r.totalCalls,0),
+    outbound:   sorted.reduce((s,r)=>s+r.outbound,0),
+    transfers:  sorted.reduce((s,r)=>s+r.transfers,0),
+    callsVOB:   sorted.reduce((s,r)=>s+r.callsVOB,0),
+    chatsVOB:   sorted.reduce((s,r)=>s+r.chatsVOB,0),
+    admitCalls: sorted.reduce((s,r)=>s+r.admitCalls,0),
+    admitChats: sorted.reduce((s,r)=>s+r.admitChats,0),
+    totalAdmits:sorted.reduce((s,r)=>s+r.totalAdmits,0)
+  };
+  gt.vobPct = gt.totalCalls>0 ? (gt.callsVOB/gt.totalCalls*100) : 0;
+
+  const gtRow = `<tr class="grand-total-row">
+    <td></td>
+    <td><span class="grand-total-label">GRAND TOTAL</span></td>
+    <td>${gt.totalCalls.toLocaleString()}</td>
+    <td>${gt.outbound.toLocaleString()}</td>
+    <td>${gt.transfers.toLocaleString()}</td>
+    <td>—</td>
+    <td>${gt.callsVOB}</td>
+    <td>${gt.chatsVOB}</td>
+    <td><span class="vob-pct ${gt.vobPct>=4?'vob-high':gt.vobPct>=2?'vob-mid':'vob-low'}">${gt.vobPct.toFixed(2)}%</span></td>
+    <td>${gt.admitCalls}</td>
+    <td>${gt.admitChats}</td>
+    <td><span class="grand-total-admits">${gt.totalAdmits}</span></td>
+  </tr>`;
+
+  document.getElementById('table-wrap').innerHTML=`<div style="overflow-x:auto"><table>
+    <thead><tr>${cols.map(c=>c.key==='#'?`<th>#</th>`:`<th class="${sortCol===c.key?'sorted':''}" onclick="sort('${c.key}')">${c.label}${sortCol===c.key?(sortDir===1?' ↓':' ↑'):''}</th>`).join('')}</tr></thead>
+    <tbody>${sorted.map((r,i)=>`<tr>${cols.map(c=>`<td>${c.render(r,i)}</td>`).join('')}</tr>`).join('')}${gtRow}</tbody>
+  </table></div>`;
+}
+
+function renderAgentSection(){
+  const agentName=document.getElementById('filter-agent').value;
+  const empty=document.getElementById('agent-empty');
+  const content=document.getElementById('agent-content');
+
+  if(agentName==='all'){
+    empty.style.display='';
+    content.style.display='none';
+    return;
+  }
+  empty.style.display='none';
+  content.style.display='';
+  set('agent-name-display',agentName);
+
+  // All-time data for this agent, sorted chronologically
+  const agentRows=allData.filter(d=>d.name===agentName).map(d=>{
+    const p=d.month.trim().split(' ');
+    return {...d,monthName:p[0]||'',yearNum:parseInt(p[1])||0,monthIdx:MONTHS.indexOf(p[0])};
+  }).sort((a,b)=>(a.yearNum-b.yearNum)||(a.monthIdx-b.monthIdx));
+
+  // Stats for the currently selected month/year
+  const cur=agentRows.find(r=>r.monthName===currentMonth && r.yearNum===parseInt(currentYear));
+  set('a-calls-label',`Total Calls — ${currentMonth} ${currentYear}`);
+  set('a-vobpct-label',`Avg VOB % — ${currentMonth} ${currentYear}`);
+  set('a-calls',(cur?cur.totalCalls:0).toLocaleString());
+  set('a-callsvob',(cur?cur.callsVOB:0).toLocaleString());
+  set('a-vobpct',(cur?cur.vobPct:0).toFixed(1)+'%');
+  set('a-admits',(cur?cur.totalAdmits:0).toLocaleString());
+
+  // Team rank this month (Total Admits desc, VOB% tiebreaker)
+  const monthRows=allData.filter(d=>{const p=d.month.trim().split(' ');return p[0]===currentMonth&&p[1]===String(currentYear);});
+  const ranked=[...monthRows].sort((a,b)=>(b.totalAdmits-a.totalAdmits)||(b.vobPct-a.vobPct));
+  const rankIdx=ranked.findIndex(r=>r.name===agentName);
+  if(rankIdx>=0){
+    set('a-rank',`#${rankIdx+1} of ${ranked.length}`);
+    set('a-rank-sub',`${ranked[rankIdx].totalAdmits} admits this month`);
+  }else{
+    set('a-rank','—');
+    set('a-rank-sub',`No data for ${currentMonth} ${currentYear}`);
+  }
+
+  // Trend vs previous month
+  const curIdx=cur?agentRows.indexOf(cur):-1;
+  if(curIdx>0){
+    const prev=agentRows[curIdx-1];
+    const trendEl=document.getElementById('a-trend');
+    if(prev.totalCalls===0){
+      trendEl.textContent='—';
+      set('a-trend-sub','No prior month data');
+    }else{
+      const diff=((cur.totalCalls-prev.totalCalls)/prev.totalCalls)*100;
+      const up=diff>=0;
+      trendEl.innerHTML=`<span class="${up?'trend-up':'trend-down'}">${up?'▲':'▼'} ${Math.abs(diff).toFixed(1)}%</span>`;
+      set('a-trend-sub',`${prev.monthName} ${prev.yearNum}: ${prev.totalCalls} → ${cur.totalCalls} calls`);
+    }
+  }else{
+    document.getElementById('a-trend').textContent='—';
+    set('a-trend-sub','Not enough history yet');
+  }
+
+  // Best month all-time
+  if(agentRows.length){
+    const best=[...agentRows].sort((a,b)=>(b.totalAdmits-a.totalAdmits)||(b.vobPct-a.vobPct))[0];
+    set('a-best',`${best.monthName} ${best.yearNum}`);
+    set('a-best-sub',`${best.totalAdmits} total admits · ${best.vobPct.toFixed(2)}% VOB`);
+  }else{
+    set('a-best','—');
+    set('a-best-sub','No data yet');
+  }
+
+  buildAgentBarChart(agentRows);
+  renderAgentTable(agentRows);
+}
+
+function niceCeil(v){
+  if(v<=0) return 10;
+  const mag=Math.pow(10,Math.floor(Math.log10(v)));
+  const norm=v/mag;
+  let nice;
+  if(norm<=1) nice=1; else if(norm<=2) nice=2; else if(norm<=5) nice=5; else nice=10;
+  return nice*mag;
+}
+
+function buildAgentBarChart(rows){
+  const svg=document.getElementById('agent-bar-chart');
+  if(!rows.length){
+    svg.removeAttribute('width');
+    svg.setAttribute('viewBox','0 0 600 260');
+    svg.innerHTML='<text x="300" y="130" text-anchor="middle" fill="#94a3b8" font-size="12">No data available for this agent</text>';
+    return;
+  }
+  const H=260,padL=46,padR=16,padT=16,padB=34;
+  const W=Math.max(560,rows.length*68+padL+padR);
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const maxVal=Math.max(...rows.map(r=>r.totalCalls),1);
+  const niceMax=niceCeil(maxVal);
+  const groupW=plotW/rows.length;
+  const series=[
+    {key:'totalCalls',color:'#3b82f6'},
+    {key:'callsVOB',color:'#a855f7'},
+    {key:'chatsVOB',color:'#f97316'},
+    {key:'totalAdmits',color:'#10b981'}
+  ];
+  const barW=Math.min(13,(groupW-6)/series.length);
+  let grid='',bars='',labels='';
+  for(let i=0;i<=4;i++){
+    const v=niceMax*i/4;
+    const y=padT+plotH-(v/niceMax)*plotH;
+    grid+=`<line x1="${padL}" x2="${W-padR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3,3"/>`;
+    grid+=`<text x="${padL-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-size="10" fill="#94a3b8">${Math.round(v)}</text>`;
+  }
+  rows.forEach((r,i)=>{
+    const gx=padL+i*groupW;
+    const groupStart=gx+groupW/2-(series.length*barW)/2;
+    series.forEach((s,si)=>{
+      const val=r[s.key]||0;
+      const bh=Math.max((val/niceMax)*plotH,val>0?1:0);
+      const bx=groupStart+si*barW;
+      const by=padT+plotH-bh;
+      bars+=`<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(barW-1.5).toFixed(1)}" height="${bh.toFixed(1)}" fill="${s.color}" rx="1"/>`;
+    });
+    labels+=`<text x="${(gx+groupW/2).toFixed(1)}" y="${H-10}" text-anchor="middle" font-size="10" fill="#64748b">${r.monthName.slice(0,3)} ${r.yearNum}</text>`;
+  });
+  const axes=`<line x1="${padL}" x2="${padL}" y1="${padT}" y2="${padT+plotH}" stroke="#cbd5e1"/><line x1="${padL}" x2="${W-padR}" y1="${padT+plotH}" y2="${padT+plotH}" stroke="#cbd5e1"/>`;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('width',W);
+  svg.setAttribute('height',H);
+  svg.innerHTML=grid+axes+bars+labels;
+}
+
+function renderAgentTable(rows){
+  if(!rows.length){
+    document.getElementById('agent-table-wrap').innerHTML='<div style="padding:16px;color:#94a3b8;font-size:12px;">No data available for this agent yet.</div>';
+    return;
+  }
+  const html=`<div style="overflow-x:auto"><table>
+    <thead><tr><th>Month</th><th>Calls</th><th>Outbound</th><th>Calls VOB</th><th>Chats VOB</th><th>VOB%</th><th>Admits (Calls)</th><th>Admits (Chats)</th><th>Total Admits</th></tr></thead>
+    <tbody>${[...rows].reverse().map(r=>`<tr>
+      <td>${r.monthName} ${r.yearNum}</td>
+      <td>${r.totalCalls.toLocaleString()}</td>
+      <td>${r.outbound.toLocaleString()}</td>
+      <td>${r.callsVOB}</td>
+      <td>${r.chatsVOB}</td>
+      <td><span class="vob-pct ${r.vobPct>=4?'vob-high':r.vobPct>=2?'vob-mid':'vob-low'}">${r.vobPct.toFixed(2)}%</span></td>
+      <td>${r.admitCalls||''}</td>
+      <td>${r.admitChats||''}</td>
+      <td>${r.totalAdmits?`<span class="admit-badge">${r.totalAdmits}</span>`:''}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+  document.getElementById('agent-table-wrap').innerHTML=html;
+}
+
+const COL_LABELS = {
+  'totalCalls':'Total Calls','outbound':'Outbound','transfers':'Transfers',
+  'aht':'AHT','callsVOB':'Calls VOB','chatsVOB':'Chats VOB',
+  'vobPct':'VOB Rate','admitCalls':'Admits (Calls)','admitChats':'Admits (Chats)',
+  'totalAdmits':'Total Admits','name':'Agent'
+};
+
+function updateSortLabel(){
+  const el=document.getElementById('lb-sort-label');
+  if(!el) return;
+  if(sortCol==='totalAdmits' && sortDir===1){
+    el.textContent='Ranked by Total Admits ↓ · VOB Rate ↓ (tiebreaker) · Click column to re-rank';
+  } else {
+    const label=COL_LABELS[sortCol]||sortCol;
+    const arrow=sortDir===1?'↓':'↑';
+    el.textContent=`Ranked by ${label} ${arrow} · Click column to re-rank`;
+  }
+}
+
+function sort(col){
+  if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}
+  renderAll();
+}
+
+loadData();
+setInterval(loadData,60000);
+</script>
+</body>
+</html>
