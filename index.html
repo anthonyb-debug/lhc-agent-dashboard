@@ -90,18 +90,131 @@
   thead tr{border-bottom:1px solid #e2e8f0;}
   th{padding:6px 8px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:0.5px;text-transform:uppercase;white-space:nowrap;cursor:pointer;}
   th:hover{color:#0ea5e9;} th.sorted{color:#0ea5e9;}
-  td{padding:7px 8px;color:#374151;border-bottom:1px solid #f8fafc;white-space:nowrap;}
+  td{padding:7px 8px;color:#374151;border-bottom:1px solid #f8fafc;white-space:nowrap;transition:background 0.15s,color 0.15s;}
   tr:last-child td{border-bottom:none;}
-  tr:hover td{background:#f8fafc;}
+
+  /* ── LEADERBOARD — NAME-ONLY HOVER ── */
+  tbody tr.lb-row td { transition: background 0.15s; }
+
+  /* Highlight only the agent-name cell on hover */
+  .agent-name {
+    font-weight: 600; color: #0f172a;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 5px;
+    transition: color 0.15s, background 0.15s;
+    display: inline-block;
+  }
+  .agent-name:hover {
+    color: #0ea5e9;
+    background: #f0f9ff;
+  }
+
+  /* mini sparkline — hidden by default, shown on agent-name hover */
+  .lb-spark { display:inline-flex; align-items:flex-end; gap:1.5px; height:14px; vertical-align:middle; margin-left:5px; opacity:0; transition:opacity 0.2s; pointer-events:none; }
+  .agent-name:hover + .lb-spark,
+  .agent-name:hover ~ .lb-spark { opacity:1; }
+  /* Since spark is a sibling inside the same <td>, use a wrapper trick */
+  .lb-name-wrap { display:inline-flex; align-items:center; gap:0; }
+  .lb-name-wrap:hover .agent-name  { color:#0ea5e9; background:#f0f9ff; }
+  .lb-name-wrap:hover .lb-spark    { opacity:1; }
+  .lb-spark-bar { width:4px; background:#0ea5e9; border-radius:1px; }
+
+  /* tooltip card — shown on agent-name hover */
+  .lb-tooltip {
+    position: fixed; z-index: 9999;
+    background: #0f172a; color: #e2e8f0;
+    border-radius: 10px; padding: 12px 14px;
+    font-size: 12px; line-height: 1.7;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+    pointer-events: none; white-space: nowrap;
+    opacity: 0; transform: translateY(4px);
+    transition: opacity 0.18s, transform 0.18s;
+    min-width: 200px;
+  }
+  .lb-tooltip.visible { opacity: 1; transform: translateY(0); }
+  .lb-tooltip-name{font-size:13px;font-weight:700;color:#38bdf8;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:5px;}
+  .lb-tooltip-row{display:flex;justify-content:space-between;gap:20px;}
+  .lb-tooltip-label{color:#94a3b8;}
+  .lb-tooltip-val{font-weight:600;color:#fff;}
+
   .rank-num{font-weight:700;color:#94a3b8;}
   .rank-1{color:#f59e0b;} .rank-2{color:#94a3b8;} .rank-3{color:#b45309;}
-  .agent-name{font-weight:600;color:#0f172a;}
+  /* .agent-name styles defined in the name-hover block above */
   .vob-pct{font-weight:600;}
   .vob-high{color:#059669;} .vob-mid{color:#d97706;} .vob-low{color:#dc2626;}
-  .admit-badge{background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;}
+  .admit-badge{background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;transition:background 0.15s,color 0.15s,transform 0.15s;display:inline-block;}
   .grand-total-row td{background:#f0f9ff;border-top:2px solid #0ea5e9;font-weight:700;color:#0f172a;font-size:12.5px;}
   .grand-total-label{color:#0ea5e9;font-weight:800;letter-spacing:0.3px;}
   .grand-total-admits{background:#0ea5e9;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;}
+
+  /* ── AGENT PERFORMANCE TRACKER ── */
+  .perf-tracker-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;cursor:default;}
+  .perf-tracker-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
+  .perf-tracker-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:14px;}
+
+  .perf-kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px;}
+  .perf-kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;transition:border-color 0.2s,background 0.2s;}
+  .perf-kpi:hover{border-color:#0ea5e9;background:#f0f9ff;}
+  .perf-kpi-icon{font-size:18px;margin-bottom:3px;}
+  .perf-kpi-val{font-size:20px;font-weight:700;color:#0f172a;line-height:1.1;}
+  .perf-kpi-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;font-weight:600;margin-top:2px;}
+  .perf-kpi.kpi-good{border-color:#6ee7b7;background:#f0fdf4;}
+  .perf-kpi.kpi-good .perf-kpi-val{color:#059669;}
+  .perf-kpi.kpi-warn{border-color:#fcd34d;background:#fffbeb;}
+  .perf-kpi.kpi-warn .perf-kpi-val{color:#d97706;}
+  .perf-kpi.kpi-bad{border-color:#fca5a5;background:#fff5f5;}
+  .perf-kpi.kpi-bad .perf-kpi-val{color:#dc2626;}
+
+  /* Goal progress bars */
+  .perf-goals{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+  .perf-goal-item{display:flex;flex-direction:column;gap:4px;}
+  .perf-goal-top{display:flex;justify-content:space-between;align-items:baseline;}
+  .perf-goal-name{font-size:12px;font-weight:600;color:#374151;}
+  .perf-goal-nums{font-size:11px;color:#94a3b8;}
+  .perf-goal-track{background:#e2e8f0;border-radius:20px;height:10px;overflow:hidden;}
+  .perf-goal-fill{height:100%;border-radius:20px;transition:width 0.6s ease;}
+  .fill-green{background:linear-gradient(90deg,#10b981,#34d399);}
+  .fill-blue{background:linear-gradient(90deg,#3b82f6,#60a5fa);}
+  .fill-purple{background:linear-gradient(90deg,#8b5cf6,#a78bfa);}
+  .fill-orange{background:linear-gradient(90deg,#f97316,#fb923c);}
+
+  /* Performance score ring */
+  .perf-score-wrap{display:flex;align-items:center;gap:16px;background:#f8fafc;border-radius:10px;padding:12px 16px;margin-bottom:14px;border:1px solid #e2e8f0;}
+  .perf-score-ring{position:relative;width:80px;height:80px;flex-shrink:0;}
+  .perf-score-ring svg{transform:rotate(-90deg);}
+  .perf-score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .perf-score-num{font-size:22px;font-weight:800;color:#0f172a;line-height:1;}
+  .perf-score-label{font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;}
+  .perf-score-detail{flex:1;}
+  .perf-score-title{font-size:15px;font-weight:700;color:#0f172a;margin-bottom:3px;}
+  .perf-score-sub{font-size:12px;color:#64748b;line-height:1.5;}
+  .perf-score-grade{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+  .grade-s{background:#dcfce7;color:#166534;}
+  .grade-a{background:#dbeafe;color:#1d4ed8;}
+  .grade-b{background:#fef9c3;color:#854d0e;}
+  .grade-c{background:#fee2e2;color:#991b1b;}
+
+  /* Streak & badges */
+  .perf-badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .perf-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid;}
+  .badge-gold{background:#fef3c7;color:#92400e;border-color:#fde68a;}
+  .badge-blue{background:#dbeafe;color:#1e40af;border-color:#bfdbfe;}
+  .badge-green{background:#d1fae5;color:#065f46;border-color:#a7f3d0;}
+  .badge-purple{background:#ede9fe;color:#5b21b6;border-color:#ddd6fe;}
+  .badge-red{background:#fee2e2;color:#991b1b;border-color:#fecaca;}
+  .badge-gray{background:#f1f5f9;color:#475569;border-color:#e2e8f0;}
+
+  /* Comparison vs team */
+  .perf-vs-team{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;}
+  .vs-item{background:#f8fafc;border-radius:8px;padding:8px 12px;border:1px solid #e2e8f0;}
+  .vs-item-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;font-weight:600;margin-bottom:4px;}
+  .vs-item-bar-wrap{display:flex;align-items:center;gap:8px;}
+  .vs-item-bar-track{flex:1;background:#e2e8f0;border-radius:20px;height:7px;overflow:hidden;}
+  .vs-item-bar-fill{height:100%;border-radius:20px;background:#0ea5e9;transition:width 0.6s ease;}
+  .vs-item-vals{font-size:11px;color:#374151;font-weight:600;white-space:nowrap;}
+  .vs-you{color:#0ea5e9;font-weight:700;}
+  .vs-avg{color:#94a3b8;}
 
   /* Loading/Error */
   .loading{display:flex;align-items:center;justify-content:center;height:160px;color:#94a3b8;font-size:14px;gap:8px;}
@@ -204,7 +317,7 @@
       <div class="filter-val" id="filter-month">June</div>
       <div class="filter-arrow" onclick="changeMonth(1)">›</div>
     </div>
-    <div class="filter-group">
+    <div class="filter-group" id="agent-filter-group" style="display:none;">
       <div class="filter-label">Agent</div>
       <select class="filter-select" id="filter-agent" onchange="renderAll()">
         <option value="all">All agents</option>
@@ -375,9 +488,122 @@
         </div>
         <div id="agent-table-wrap"><div class="loading"><div class="spinner"></div> Loading data...</div></div>
       </div>
+
+      <!-- ── AGENT PERFORMANCE TRACKER ── -->
+      <div class="perf-tracker-card" id="perf-tracker-card" style="margin-top:12px;">
+        <h3>🚀 My Performance Tracker — <span id="perf-agent-name">—</span></h3>
+
+        <!-- Performance Score Ring -->
+        <div class="perf-score-wrap" id="perf-score-wrap">
+          <div class="perf-score-ring">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="34" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+              <circle id="perf-ring-arc" cx="40" cy="40" r="34" fill="none" stroke="#0ea5e9" stroke-width="8"
+                stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"
+                style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s ease;"/>
+            </svg>
+            <div class="perf-score-text">
+              <div class="perf-score-num" id="perf-score-num">—</div>
+              <div class="perf-score-label">Score</div>
+            </div>
+          </div>
+          <div class="perf-score-detail">
+            <div class="perf-score-title" id="perf-score-title">Performance Overview</div>
+            <div class="perf-score-sub" id="perf-score-sub">Select an agent to view their performance score.</div>
+            <div id="perf-score-grade"></div>
+          </div>
+        </div>
+
+        <!-- Earned Badges -->
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🏅 Earned Badges</div>
+        <div class="perf-badges" id="perf-badges">
+          <div class="perf-badge badge-gray">No badges yet — select an agent</div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">📊 Key Metrics (All-Time)</div>
+        <div class="perf-kpi-grid" id="perf-kpi-grid">
+          <div class="perf-kpi"><div class="perf-kpi-icon">📞</div><div class="perf-kpi-val" id="pk-calls">—</div><div class="perf-kpi-label">Total Calls</div></div>
+          <div class="perf-kpi"><div class="perf-kpi-icon">✅</div><div class="perf-kpi-val" id="pk-vob">—</div><div class="perf-kpi-label">Total VOBs</div></div>
+          <div class="perf-kpi"><div class="perf-kpi-icon">🏥</div><div class="perf-kpi-val" id="pk-admits">—</div><div class="perf-kpi-label">Total Admits</div></div>
+          <div class="perf-kpi"><div class="perf-kpi-icon">📈</div><div class="perf-kpi-val" id="pk-vobpct">—</div><div class="perf-kpi-label">Avg VOB Rate</div></div>
+          <div class="perf-kpi"><div class="perf-kpi-icon">🌟</div><div class="perf-kpi-val" id="pk-bestmonth">—</div><div class="perf-kpi-label">Best Month (Admits)</div></div>
+          <div class="perf-kpi"><div class="perf-kpi-icon">📅</div><div class="perf-kpi-val" id="pk-months">—</div><div class="perf-kpi-label">Months Active</div></div>
+        </div>
+
+        <!-- Goal Progress Bars -->
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🎯 Monthly Goals (Current Month)</div>
+        <div class="perf-goals" id="perf-goals">
+          <div class="perf-goal-item">
+            <div class="perf-goal-top">
+              <span class="perf-goal-name">Calls Goal</span>
+              <span class="perf-goal-nums" id="pg-calls-nums">—</span>
+            </div>
+            <div class="perf-goal-track"><div class="perf-goal-fill fill-blue" id="pg-calls-bar" style="width:0%"></div></div>
+          </div>
+          <div class="perf-goal-item">
+            <div class="perf-goal-top">
+              <span class="perf-goal-name">VOB Goal</span>
+              <span class="perf-goal-nums" id="pg-vob-nums">—</span>
+            </div>
+            <div class="perf-goal-track"><div class="perf-goal-fill fill-purple" id="pg-vob-bar" style="width:0%"></div></div>
+          </div>
+          <div class="perf-goal-item">
+            <div class="perf-goal-top">
+              <span class="perf-goal-name">Admits Goal</span>
+              <span class="perf-goal-nums" id="pg-admits-nums">—</span>
+            </div>
+            <div class="perf-goal-track"><div class="perf-goal-fill fill-green" id="pg-admits-bar" style="width:0%"></div></div>
+          </div>
+          <div class="perf-goal-item">
+            <div class="perf-goal-top">
+              <span class="perf-goal-name">VOB Rate Goal (≥4%)</span>
+              <span class="perf-goal-nums" id="pg-rate-nums">—</span>
+            </div>
+            <div class="perf-goal-track"><div class="perf-goal-fill fill-orange" id="pg-rate-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <!-- You vs Team Average -->
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">⚡ You vs Team Average (This Month)</div>
+        <div class="perf-vs-team" id="perf-vs-team">
+          <div class="vs-item">
+            <div class="vs-item-label">Total Calls</div>
+            <div class="vs-item-bar-wrap">
+              <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-calls-bar" style="width:50%"></div></div>
+              <div class="vs-item-vals"><span class="vs-you" id="vt-calls-you">—</span> <span class="vs-avg">/ avg —</span></div>
+            </div>
+          </div>
+          <div class="vs-item">
+            <div class="vs-item-label">VOBs</div>
+            <div class="vs-item-bar-wrap">
+              <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-vob-bar" style="width:50%"></div></div>
+              <div class="vs-item-vals"><span class="vs-you" id="vt-vob-you">—</span> <span class="vs-avg" id="vt-vob-avg">/ avg —</span></div>
+            </div>
+          </div>
+          <div class="vs-item">
+            <div class="vs-item-label">Admits</div>
+            <div class="vs-item-bar-wrap">
+              <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-admits-bar" style="width:50%"></div></div>
+              <div class="vs-item-vals"><span class="vs-you" id="vt-admits-you">—</span> <span class="vs-avg" id="vt-admits-avg">/ avg —</span></div>
+            </div>
+          </div>
+          <div class="vs-item">
+            <div class="vs-item-label">VOB Rate</div>
+            <div class="vs-item-bar-wrap">
+              <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-rate-bar" style="width:50%"></div></div>
+              <div class="vs-item-vals"><span class="vs-you" id="vt-rate-you">—</span> <span class="vs-avg" id="vt-rate-avg">/ avg —</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 </main>
+
+<!-- Leaderboard row tooltip -->
+<div class="lb-tooltip" id="lb-tooltip"></div>
 
 <script>
 const API_KEY = 'AIzaSyDyOwIurmPpHRv-xRPlo87TO-l_lc1cZD4';
@@ -401,6 +627,7 @@ function setSection(s){
   document.getElementById('btn-section-agent').className='nav-pill'+(s==='agent'?' active':'');
   document.getElementById('section-team').style.display=s==='team'?'':'none';
   document.getElementById('section-agent').style.display=s==='agent'?'':'none';
+  document.getElementById('agent-filter-group').style.display=s==='agent'?'':'none';
   renderAll();
 }
 
@@ -908,11 +1135,60 @@ function renderTable(data){
     <td><span class="grand-total-admits">${gt.totalAdmits}</span></td>
   </tr>`;
 
+  // Build mini sparkline bars (admits bar + vob bar)
+  const maxAdmits = Math.max(...sorted.map(r=>r.totalAdmits),1);
+  function sparkBars(r){
+    const steps=[0.3,0.55,0.75,0.9,1.0];
+    return steps.map(f=>{
+      const h=Math.round(f*(r.totalAdmits/maxAdmits)*14);
+      return `<div class="lb-spark-bar" style="height:${Math.max(2,h)}px"></div>`;
+    }).join('');
+  }
+
   document.getElementById('table-wrap').innerHTML=`<div style="overflow-x:auto"><table>
     <thead><tr>${cols.map(c=>c.key==='#'?`<th>#</th>`:`<th class="${sortCol===c.key?'sorted':''}" onclick="sort('${c.key}')">${c.label}${sortCol===c.key?(sortDir===1?' ↓':' ↑'):''}</th>`).join('')}</tr></thead>
-    <tbody>${sorted.map((r,i)=>`<tr>${cols.map(c=>`<td>${c.render(r,i)}</td>`).join('')}</tr>`).join('')}${gtRow}</tbody>
+    <tbody>${sorted.map((r,i)=>`<tr class="lb-row" data-idx="${i}">${cols.map((c,ci)=>{
+      if(ci===1) return `<td><span class="lb-name-wrap"><span class="agent-name">${r.name}</span><span class="lb-spark">${sparkBars(r)}</span></span></td>`;
+      return `<td>${c.render(r,i)}</td>`;
+    }).join('')}</tr>`).join('')}${gtRow}</tbody>
   </table></div>`;
+
+  // Attach tooltip events to AGENT NAME CELLS ONLY
+  const tooltip = document.getElementById('lb-tooltip');
+  document.querySelectorAll('.lb-row').forEach((tr,i)=>{
+    const r = sorted[i];
+    if(!r) return;
+    const nameCell = tr.querySelector('.agent-name');
+    if(!nameCell) return;
+    const rankLabel = i===0?'🥇 1st':i===1?'🥈 2nd':i===2?'🥉 3rd':`#${i+1}`;
+    const vobCls = r.vobPct>=4?'#059669':r.vobPct>=2?'#d97706':'#dc2626';
+    nameCell.addEventListener('mouseenter', ()=>{
+      tooltip.innerHTML=`
+        <div class="lb-tooltip-name">${r.name}</div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Rank</span><span class="lb-tooltip-val">${rankLabel}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Total Calls</span><span class="lb-tooltip-val">${r.totalCalls.toLocaleString()}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Calls VOB</span><span class="lb-tooltip-val">${r.callsVOB}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Chats VOB</span><span class="lb-tooltip-val">${r.chatsVOB}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">VOB Rate</span><span class="lb-tooltip-val" style="color:${vobCls}">${r.vobPct.toFixed(2)}%</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Admits (Calls)</span><span class="lb-tooltip-val">${r.admitCalls||0}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Admits (Chats)</span><span class="lb-tooltip-val">${r.admitChats||0}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Total Admits</span><span class="lb-tooltip-val" style="color:#059669">${r.totalAdmits}</span></div>
+      `;
+      tooltip.classList.add('visible');
+    });
+    nameCell.addEventListener('mousemove', e=>{
+      const pad=14;
+      let x=e.clientX+pad, y=e.clientY+pad;
+      const tw=tooltip.offsetWidth||220, th=tooltip.offsetHeight||180;
+      if(x+tw>window.innerWidth-10) x=e.clientX-tw-pad;
+      if(y+th>window.innerHeight-10) y=e.clientY-th-pad;
+      tooltip.style.left=x+'px';
+      tooltip.style.top=y+'px';
+    });
+    nameCell.addEventListener('mouseleave',()=>tooltip.classList.remove('visible'));
+  });
 }
+
 
 function renderAgentSection(){
   const agentName=document.getElementById('filter-agent').value;
@@ -986,7 +1262,145 @@ function renderAgentSection(){
 
   buildAgentBarChart(agentRows);
   renderAgentTable(agentRows);
+  renderPerfTracker(agentName, agentRows, cur);
 }
+
+// ── PERFORMANCE TRACKER ──────────────────────────────────────
+function renderPerfTracker(agentName, agentRows, cur){
+  set('perf-agent-name', agentName);
+
+  // ── All-time aggregates ──
+  const totCalls  = agentRows.reduce((s,r)=>s+r.totalCalls,0);
+  const totVOB    = agentRows.reduce((s,r)=>s+(r.callsVOB+r.chatsVOB),0);
+  const totAdmits = agentRows.reduce((s,r)=>s+r.totalAdmits,0);
+  const avgVOBpct = totCalls>0 ? (agentRows.reduce((s,r)=>s+r.callsVOB,0)/totCalls*100) : 0;
+  const bestRow   = agentRows.length ? [...agentRows].sort((a,b)=>b.totalAdmits-a.totalAdmits)[0] : null;
+  const months    = agentRows.length;
+
+  // ── KPI cards ──
+  const kpiAdmitsCls = totAdmits>=10?'kpi-good':totAdmits>=5?'':'kpi-warn';
+  const kpiVOBCls    = avgVOBpct>=4?'kpi-good':avgVOBpct>=2?'kpi-warn':'kpi-bad';
+  const kpiCallsCls  = totCalls>=500?'kpi-good':totCalls>=200?'':'kpi-warn';
+
+  document.querySelectorAll('#perf-kpi-grid .perf-kpi').forEach((el,i)=>{
+    el.className='perf-kpi';
+    if(i===2) el.classList.add(kpiAdmitsCls);
+    if(i===3) el.classList.add(kpiVOBCls);
+    if(i===0) el.classList.add(kpiCallsCls);
+  });
+
+  set('pk-calls', totCalls.toLocaleString());
+  set('pk-vob', totVOB.toLocaleString());
+  set('pk-admits', totAdmits.toLocaleString());
+  set('pk-vobpct', avgVOBpct.toFixed(2)+'%');
+  set('pk-bestmonth', bestRow ? `${bestRow.totalAdmits} (${bestRow.monthName} ${bestRow.yearNum})` : '—');
+  set('pk-months', months+' month'+(months!==1?'s':''));
+
+  // ── Performance Score (0–100) ──
+  // Weighted: Admits 40pts + VOB Rate 30pts + Calls 20pts + Consistency 10pts
+  const admitScore = Math.min(40, totAdmits * 4);
+  const vobScore   = Math.min(30, avgVOBpct / 4 * 30);
+  const callScore  = Math.min(20, (totCalls / 500) * 20);
+  // Consistency: % of months with at least 1 admit
+  const monthsWithAdmit = agentRows.filter(r=>r.totalAdmits>0).length;
+  const consScore  = months>0 ? Math.min(10, (monthsWithAdmit/months)*10) : 0;
+  const score      = Math.round(admitScore + vobScore + callScore + consScore);
+
+  const circumference = 213.6; // 2π×34
+  const offset = circumference - (score/100)*circumference;
+  const arc = document.getElementById('perf-ring-arc');
+  if(arc){
+    arc.style.strokeDashoffset = offset;
+    arc.style.stroke = score>=80?'#10b981':score>=60?'#3b82f6':score>=40?'#f59e0b':'#ef4444';
+  }
+  set('perf-score-num', score);
+
+  let grade, gradeClass, gradeEmoji, scoreSub;
+  if(score>=80){grade='S — Elite';gradeClass='grade-s';gradeEmoji='🏆';scoreSub='Outstanding performance across all metrics.';}
+  else if(score>=60){grade='A — Strong';gradeClass='grade-a';gradeEmoji='⭐';scoreSub='Above-average performer. Keep pushing!';}
+  else if(score>=40){grade='B — Developing';gradeClass='grade-b';gradeEmoji='📈';scoreSub='Solid foundation. Focus on VOB rate and admits.';}
+  else{grade='C — Needs Growth';gradeClass='grade-c';gradeEmoji='💪';scoreSub='Room to improve. Set weekly goals and track daily.';}
+  set('perf-score-title',`${gradeEmoji} Performance Score`);
+  set('perf-score-sub',scoreSub);
+  document.getElementById('perf-score-grade').innerHTML=`<div class="perf-score-grade ${gradeClass}">${grade}</div>`;
+
+  // ── Badges ──
+  const badges = [];
+  if(totAdmits>=20)  badges.push({cls:'badge-gold',icon:'🏆',label:'20+ Admits'});
+  else if(totAdmits>=10) badges.push({cls:'badge-green',icon:'🏅',label:'10+ Admits'});
+  if(avgVOBpct>=4)   badges.push({cls:'badge-blue',icon:'🎯',label:'4%+ VOB Rate'});
+  if(totCalls>=500)  badges.push({cls:'badge-purple',icon:'📞',label:'500+ Calls'});
+  if(months>=6)      badges.push({cls:'badge-blue',icon:'📅',label:'6+ Months Active'});
+  if(monthsWithAdmit===months && months>0) badges.push({cls:'badge-green',icon:'🔥',label:'Every Month Admits'});
+  if(bestRow && bestRow.totalAdmits>=5) badges.push({cls:'badge-gold',icon:'⭐',label:`${bestRow.totalAdmits} Admits in ${bestRow.monthName}`});
+  if(cur && cur.vobPct>=4) badges.push({cls:'badge-green',icon:'💚',label:'On Fire This Month'});
+  if(score>=80) badges.push({cls:'badge-gold',icon:'✨',label:'Elite Performer'});
+
+  document.getElementById('perf-badges').innerHTML = badges.length
+    ? badges.map(b=>`<div class="perf-badge ${b.cls}">${b.icon} ${b.label}</div>`).join('')
+    : '<div class="perf-badge badge-gray">📭 No badges yet — keep going!</div>';
+
+  // ── Monthly Goals (current month) ──
+  const GOALS = {calls:300, vob:12, admits:5, rate:4};
+  const curCalls  = cur?cur.totalCalls:0;
+  const curVOB    = cur?(cur.callsVOB+cur.chatsVOB):0;
+  const curAdmits = cur?cur.totalAdmits:0;
+  const curRate   = cur?cur.vobPct:0;
+
+  function setGoalBar(barId, numsId, val, goal){
+    const pct = Math.min(100, Math.round(val/goal*100));
+    const el = document.getElementById(barId);
+    if(el) el.style.width = pct+'%';
+    const numsEl = document.getElementById(numsId);
+    if(numsEl) numsEl.textContent = `${val} / ${goal} (${pct}%)`;
+  }
+  setGoalBar('pg-calls-bar','pg-calls-nums', curCalls, GOALS.calls);
+  setGoalBar('pg-vob-bar',  'pg-vob-nums',   curVOB,   GOALS.vob);
+  setGoalBar('pg-admits-bar','pg-admits-nums',curAdmits,GOALS.admits);
+  setGoalBar('pg-rate-bar', 'pg-rate-nums',  Math.round(curRate*10)/10, GOALS.rate);
+
+  // ── You vs Team Average ──
+  const monthRows = allData.filter(d=>{
+    const p=d.month.trim().split(' ');
+    return p[0]===currentMonth && p[1]===String(currentYear);
+  });
+  const n = monthRows.length || 1;
+  const avgCalls  = Math.round(monthRows.reduce((s,r)=>s+r.totalCalls,0)/n);
+  const avgVOB    = Math.round(monthRows.reduce((s,r)=>s+(r.callsVOB+r.chatsVOB),0)/n);
+  const avgAdmits = Math.round(monthRows.reduce((s,r)=>s+r.totalAdmits,0)*10/n)/10;
+  const avgRate   = Math.round(monthRows.reduce((s,r)=>s+r.vobPct,0)*100/n)/100;
+
+  function setVsBar(barId, youId, avgEl, you, avg){
+    const max = Math.max(you,avg,1);
+    const pct = Math.round(you/max*100);
+    const barEl=document.getElementById(barId);
+    if(barEl){barEl.style.width=pct+'%';barEl.style.background=you>=avg?'#0ea5e9':'#f97316';}
+    const yEl=document.getElementById(youId);
+    if(yEl) yEl.textContent=you;
+    const aEl=document.getElementById(avgEl);
+    if(aEl) aEl.textContent=`/ avg ${avg}`;
+  }
+  setVsBar('vt-calls-bar','vt-calls-you','vt-calls-avg'.replace('avg','vt-calls-avg'), curCalls, avgCalls);
+  document.getElementById('vt-calls-you').textContent=curCalls;
+  document.getElementById('vt-calls-bar').style.width=Math.round(curCalls/Math.max(curCalls,avgCalls,1)*100)+'%';
+  document.getElementById('vt-calls-bar').style.background=curCalls>=avgCalls?'#0ea5e9':'#f97316';
+
+  document.getElementById('vt-vob-you').textContent=curVOB;
+  document.getElementById('vt-vob-avg').textContent=`/ avg ${avgVOB}`;
+  document.getElementById('vt-vob-bar').style.width=Math.round(curVOB/Math.max(curVOB,avgVOB,1)*100)+'%';
+  document.getElementById('vt-vob-bar').style.background=curVOB>=avgVOB?'#0ea5e9':'#f97316';
+
+  document.getElementById('vt-admits-you').textContent=curAdmits;
+  document.getElementById('vt-admits-avg').textContent=`/ avg ${avgAdmits}`;
+  document.getElementById('vt-admits-bar').style.width=Math.round(curAdmits/Math.max(curAdmits,avgAdmits,1)*100)+'%';
+  document.getElementById('vt-admits-bar').style.background=curAdmits>=avgAdmits?'#0ea5e9':'#f97316';
+
+  document.getElementById('vt-rate-you').textContent=curRate.toFixed(2)+'%';
+  document.getElementById('vt-rate-avg').textContent=`/ avg ${avgRate.toFixed(2)}%`;
+  document.getElementById('vt-rate-bar').style.width=Math.round(curRate/Math.max(curRate,avgRate,0.1)*100)+'%';
+  document.getElementById('vt-rate-bar').style.background=curRate>=avgRate?'#0ea5e9':'#f97316';
+}
+
 
 function niceCeil(v){
   if(v<=0) return 10;
