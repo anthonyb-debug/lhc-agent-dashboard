@@ -4,606 +4,1499 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Legacy Healing Center — Agent Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Segoe UI',system-ui,sans-serif;background:#eff4fa;color:#1a2332;min-height:100vh;font-size:14px;}
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* Main */
-  .main{padding:18px 22px;min-height:100vh;max-width:1500px;margin:0 auto;}
+:root {
+  --bg:        #F1F5F9;
+  --surface:   #FFFFFF;
+  --surface2:  #F8FAFC;
+  --border:    #E2E8F0;
+  --border2:   #CBD5E1;
+  --text-1:    #0F172A;
+  --text-2:    #334155;
+  --text-3:    #64748B;
+  --text-4:    #94A3B8;
+  --brand:     #2563EB;
+  --brand-lt:  #DBEAFE;
+  --brand-mid: #93C5FD;
+  --emerald:   #059669;
+  --emerald-lt:#D1FAE5;
+  --amber:     #D97706;
+  --amber-lt:  #FEF3C7;
+  --rose:      #DC2626;
+  --rose-lt:   #FEE2E2;
+  --purple:    #7C3AED;
+  --purple-lt: #EDE9FE;
+  --cyan:      #0891B2;
+  --cyan-lt:   #CFFAFE;
+  --pink:      #DB2777;
+  --pink-lt:   #FCE7F3;
+  --teal:      #0D9488;
+  --teal-lt:   #CCFBF1;
+  --orange:    #EA580C;
+  --orange-lt: #FFEDD5;
+  --indigo:    #4F46E5;
+  --indigo-lt: #E0E7FF;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow:    0 4px 12px rgba(15,23,42,0.08), 0 1px 4px rgba(15,23,42,0.04);
+  --shadow-lg: 0 10px 30px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06);
+  --radius:    12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+}
 
-  /* Topbar */
-  .topbar{background:#ffffff;border:1px solid #d6ecfb;border-radius:14px;padding:14px 20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:4px solid #0ea5e9;flex-wrap:wrap;}
-  .topbar-left{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-  .brand-logo{height:52px;display:block;}
-  .brand-text .eyebrow{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#0ea5e9;font-weight:700;margin-bottom:2px;}
-  .brand-text h1{font-size:23px;font-weight:700;color:#0f172a;line-height:1.15;}
-  .topbar-nav{display:flex;gap:6px;flex-wrap:wrap;}
-  .nav-pill{padding:6px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;font-size:13px;font-weight:600;color:#64748b;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
-  .nav-pill:hover{border-color:#0ea5e9;color:#0ea5e9;}
-  .nav-pill.active{background:#0ea5e9;color:#fff;border-color:#0ea5e9;}
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text-1);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
 
-  .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .info-box{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:6px 14px;min-width:100px;}
-  .info-box label{font-size:10px;color:#94a3b8;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;display:block;margin-bottom:2px;}
-  .info-box .info-val{font-size:14px;font-weight:700;color:#0f172a;}
-  .btn-refresh{padding:9px 16px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#0f172a;display:flex;align-items:center;gap:6px;height:100%;}
-  .btn-refresh:hover{background:#f8fafc;border-color:#0ea5e9;color:#0ea5e9;}
+/* ── LAYOUT ── */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-  /* Toggle (Monthly / All Time) */
-  .view-toggle{display:flex;gap:6px;}
-  .btn-toggle{padding:5px 13px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;font-size:13px;font-weight:500;cursor:pointer;color:#64748b;transition:all 0.15s;}
-  .btn-toggle.active{background:#0ea5e9;color:#fff;border-color:#0ea5e9;}
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
 
-  /* Filters */
-  .filters{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
-  .filter-group{display:flex;align-items:center;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;}
-  .filter-label{font-size:11px;color:#94a3b8;padding:0 8px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;border-right:1px solid #e2e8f0;height:32px;display:flex;align-items:center;}
-  .filter-val{font-size:14px;font-weight:500;color:#0f172a;padding:0 10px;height:32px;display:flex;align-items:center;}
-  .filter-arrow{width:24px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;border-left:1px solid #e2e8f0;font-size:12px;}
-  .filter-arrow:hover{background:#f8fafc;color:#0f172a;}
-  select.filter-select{border:none;background:#fff;font-size:14px;font-weight:500;color:#0f172a;padding:0 10px;height:32px;outline:none;cursor:pointer;min-width:130px;}
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
 
-  /* Stat cards */
-  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
-  .stat-card{position:relative;overflow:hidden;background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
-  .stat-card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#0ea5e9,#38bdf8,#a3c4bc,#c9b96e,#d4a843);border-radius:0 0 10px 10px;}
-  .stat-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
-  .stat-info label{font-size:11px;color:#94a3b8;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;display:block;margin-bottom:4px;}
-  .stat-info .stat-num{font-size:26px;font-weight:700;color:#0f172a;line-height:1;}
-  .stat-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-  .icon-blue{background:#dbeafe;} .icon-purple{background:#ede9fe;} .icon-cyan{background:#cffafe;} .icon-pink{background:#fce7f3;} .icon-teal{background:#ccfbf1;} .icon-orange{background:#ffedd5;} .icon-indigo{background:#e0e7ff;} .icon-amber{background:#fef3c7;}
+.brand-logo {
+  height: 36px;
+  width: auto;
+  display: block;
+}
 
-  /* Agent stats extras */
-  .trend-up{color:#059669;font-weight:700;} .trend-down{color:#dc2626;font-weight:700;}
-  .bar-chart-svg{display:block;}
-  .agent-empty{padding:40px 16px;text-align:center;color:#94a3b8;font-size:13px;background:#fff;border-radius:10px;border:1px solid #e2e8f0;}
+.brand-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+}
 
-  /* Top performers */
-  .top-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
-  .top-card{position:relative;overflow:hidden;background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px 18px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
-  .top-card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#0ea5e9,#38bdf8,#a3c4bc,#c9b96e,#d4a843);border-radius:0 0 10px 10px;}
-  .top-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(139,92,246,0.12);border-color:#8b5cf6;}
-  .tc-label{font-size:10px;color:#94a3b8;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
-  .tc-name{font-size:19px;font-weight:700;color:#0f172a;}
-  .tc-sub{font-size:12px;color:#94a3b8;margin-top:3px;}
+.brand-text .eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--brand);
+  line-height: 1;
+  margin-bottom: 2px;
+}
 
-  /* Charts row */
-  .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-  .chart-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 10px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
-  .chart-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(16,185,129,0.12);border-color:#10b981;}
-  .chart-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:12px;}
+.brand-text h1 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-1);
+  line-height: 1.2;
+  white-space: nowrap;
+}
 
-  .donut-wrap{display:flex;gap:12px;align-items:center;}
-  .donut-svg{flex-shrink:0;width:190px;height:190px;}
-  .legend{display:flex;flex-direction:column;gap:3px;flex:1;overflow-y:auto;max-height:190px;}
-  .legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#374151;}
-  .legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-  .legend-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .legend-val{font-weight:600;color:#0f172a;font-size:12px;}
+.topbar-nav {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
 
-  /* Leaderboard */
-  .leaderboard-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;}
-  .lb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-  .lb-header h3{font-size:13px;font-weight:600;color:#0f172a;}
-  .lb-sort{font-size:11px;color:#94a3b8;}
-  table{width:100%;border-collapse:collapse;font-size:12px;}
-  thead tr{border-bottom:1px solid #e2e8f0;}
-  th{padding:6px 8px;text-align:left;font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:0.5px;text-transform:uppercase;white-space:nowrap;cursor:pointer;}
-  th:hover{color:#0ea5e9;} th.sorted{color:#0ea5e9;}
-  td{padding:7px 8px;color:#374151;border-bottom:1px solid #f8fafc;white-space:nowrap;transition:background 0.15s,color 0.15s;}
-  tr:last-child td{border-bottom:none;}
+.nav-pill {
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
 
-  /* ── LEADERBOARD — NAME-ONLY HOVER ── */
-  tbody tr.lb-row td { transition: background 0.15s; }
+.nav-pill:hover { color: var(--text-1); background: var(--border); }
+.nav-pill.active { background: var(--surface); color: var(--brand); box-shadow: var(--shadow-sm); }
 
-  /* Highlight only the agent-name cell on hover */
-  .agent-name {
-    font-weight: 600; color: #0f172a;
-    cursor: pointer;
-    border-radius: 4px;
-    padding: 2px 5px;
-    transition: color 0.15s, background 0.15s;
-    display: inline-block;
-  }
-  .agent-name:hover {
-    color: #0ea5e9;
-    background: #f0f9ff;
-  }
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-  /* mini sparkline — hidden by default, shown on agent-name hover */
-  .lb-spark { display:inline-flex; align-items:flex-end; gap:1.5px; height:14px; vertical-align:middle; margin-left:5px; opacity:0; transition:opacity 0.2s; pointer-events:none; }
-  .agent-name:hover + .lb-spark,
-  .agent-name:hover ~ .lb-spark { opacity:1; }
-  /* Since spark is a sibling inside the same <td>, use a wrapper trick */
-  .lb-name-wrap { display:inline-flex; align-items:center; gap:0; }
-  .lb-name-wrap:hover .agent-name  { color:#0ea5e9; background:#f0f9ff; }
-  .lb-name-wrap:hover .lb-spark    { opacity:1; }
-  .lb-spark-bar { width:4px; background:#0ea5e9; border-radius:1px; }
+.info-chip {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+}
 
-  /* tooltip card — shown on agent-name hover */
-  .lb-tooltip {
-    position: fixed; z-index: 9999;
-    background: #0f172a; color: #e2e8f0;
-    border-radius: 10px; padding: 12px 14px;
-    font-size: 12px; line-height: 1.7;
-    box-shadow: 0 8px 28px rgba(0,0,0,0.25);
-    pointer-events: none; white-space: nowrap;
-    opacity: 0; transform: translateY(4px);
-    transition: opacity 0.18s, transform 0.18s;
-    min-width: 200px;
-  }
-  .lb-tooltip.visible { opacity: 1; transform: translateY(0); }
-  .lb-tooltip-name{font-size:13px;font-weight:700;color:#38bdf8;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:5px;}
-  .lb-tooltip-row{display:flex;justify-content:space-between;gap:20px;}
-  .lb-tooltip-label{color:#94a3b8;}
-  .lb-tooltip-val{font-weight:600;color:#fff;}
+.info-chip label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-4);
+  line-height: 1;
+  margin-bottom: 2px;
+}
 
-  .rank-num{font-weight:700;color:#94a3b8;}
-  .rank-1{color:#f59e0b;} .rank-2{color:#94a3b8;} .rank-3{color:#b45309;}
-  /* .agent-name styles defined in the name-hover block above */
-  .vob-pct{font-weight:600;}
-  .vob-high{color:#059669;} .vob-mid{color:#d97706;} .vob-low{color:#dc2626;}
-  .admit-badge{background:#dcfce7;color:#166534;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px;transition:background 0.15s,color 0.15s,transform 0.15s;display:inline-block;}
-  .grand-total-row td{background:#f0f9ff;border-top:2px solid #0ea5e9;font-weight:700;color:#0f172a;font-size:12.5px;}
-  .grand-total-label{color:#0ea5e9;font-weight:800;letter-spacing:0.3px;}
-  .grand-total-admits{background:#0ea5e9;color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;}
+.info-chip .info-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-1);
+  line-height: 1;
+}
 
-  /* ── AGENT PERFORMANCE TRACKER ── */
-  .perf-tracker-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;cursor:default;}
-  .perf-tracker-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
-  .perf-tracker-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:14px;}
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
 
-  .perf-kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px;}
-  .perf-kpi{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;transition:border-color 0.2s,background 0.2s;}
-  .perf-kpi:hover{border-color:#0ea5e9;background:#f0f9ff;}
-  .perf-kpi-icon{font-size:18px;margin-bottom:3px;}
-  .perf-kpi-val{font-size:20px;font-weight:700;color:#0f172a;line-height:1.1;}
-  .perf-kpi-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;font-weight:600;margin-top:2px;}
-  .perf-kpi.kpi-good{border-color:#6ee7b7;background:#f0fdf4;}
-  .perf-kpi.kpi-good .perf-kpi-val{color:#059669;}
-  .perf-kpi.kpi-warn{border-color:#fcd34d;background:#fffbeb;}
-  .perf-kpi.kpi-warn .perf-kpi-val{color:#d97706;}
-  .perf-kpi.kpi-bad{border-color:#fca5a5;background:#fff5f5;}
-  .perf-kpi.kpi-bad .perf-kpi-val{color:#dc2626;}
+.btn-refresh:hover { background: #1D4ED8; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+.btn-refresh:active { transform: scale(0.97); }
 
-  /* Goal progress bars */
-  .perf-goals{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
-  .perf-goal-item{display:flex;flex-direction:column;gap:4px;}
-  .perf-goal-top{display:flex;justify-content:space-between;align-items:baseline;}
-  .perf-goal-name{font-size:12px;font-weight:600;color:#374151;}
-  .perf-goal-nums{font-size:11px;color:#94a3b8;}
-  .perf-goal-track{background:#e2e8f0;border-radius:20px;height:10px;overflow:hidden;}
-  .perf-goal-fill{height:100%;border-radius:20px;transition:width 0.6s ease;}
-  .fill-green{background:linear-gradient(90deg,#10b981,#34d399);}
-  .fill-blue{background:linear-gradient(90deg,#3b82f6,#60a5fa);}
-  .fill-purple{background:linear-gradient(90deg,#8b5cf6,#a78bfa);}
-  .fill-orange{background:linear-gradient(90deg,#f97316,#fb923c);}
+/* ── FILTERS BAR ── */
+.filters-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 
-  /* Performance score ring */
-  .perf-score-wrap{display:flex;align-items:center;gap:16px;background:#f8fafc;border-radius:10px;padding:12px 16px;margin-bottom:14px;border:1px solid #e2e8f0;}
-  .perf-score-ring{position:relative;width:80px;height:80px;flex-shrink:0;}
-  .perf-score-ring svg{transform:rotate(-90deg);}
-  .perf-score-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-  .perf-score-num{font-size:22px;font-weight:800;color:#0f172a;line-height:1;}
-  .perf-score-label{font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;}
-  .perf-score-detail{flex:1;}
-  .perf-score-title{font-size:15px;font-weight:700;color:#0f172a;margin-bottom:3px;}
-  .perf-score-sub{font-size:12px;color:#64748b;line-height:1.5;}
-  .perf-score-grade{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-  .grade-s{background:#dcfce7;color:#166534;}
-  .grade-a{background:#dbeafe;color:#1d4ed8;}
-  .grade-b{background:#fef9c3;color:#854d0e;}
-  .grade-c{background:#fee2e2;color:#991b1b;}
+.view-toggle {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
 
-  /* Streak & badges */
-  .perf-badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
-  .perf-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid;}
-  .badge-gold{background:#fef3c7;color:#92400e;border-color:#fde68a;}
-  .badge-blue{background:#dbeafe;color:#1e40af;border-color:#bfdbfe;}
-  .badge-green{background:#d1fae5;color:#065f46;border-color:#a7f3d0;}
-  .badge-purple{background:#ede9fe;color:#5b21b6;border-color:#ddd6fe;}
-  .badge-red{background:#fee2e2;color:#991b1b;border-color:#fecaca;}
-  .badge-gray{background:#f1f5f9;color:#475569;border-color:#e2e8f0;}
+.btn-toggle {
+  padding: 5px 14px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
 
-  /* Comparison vs team */
-  .perf-vs-team{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;}
-  .vs-item{background:#f8fafc;border-radius:8px;padding:8px 12px;border:1px solid #e2e8f0;}
-  .vs-item-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;font-weight:600;margin-bottom:4px;}
-  .vs-item-bar-wrap{display:flex;align-items:center;gap:8px;}
-  .vs-item-bar-track{flex:1;background:#e2e8f0;border-radius:20px;height:7px;overflow:hidden;}
-  .vs-item-bar-fill{height:100%;border-radius:20px;background:#0ea5e9;transition:width 0.6s ease;}
-  .vs-item-vals{font-size:11px;color:#374151;font-weight:600;white-space:nowrap;}
-  .vs-you{color:#0ea5e9;font-weight:700;}
-  .vs-avg{color:#94a3b8;}
+.btn-toggle:hover { color: var(--text-1); }
+.btn-toggle.active { background: var(--surface); color: var(--brand); box-shadow: var(--shadow-sm); }
 
-  /* Loading/Error */
-  .loading{display:flex;align-items:center;justify-content:center;height:160px;color:#94a3b8;font-size:14px;gap:8px;}
-  .spinner{width:18px;height:18px;border:2px solid #e2e8f0;border-top-color:#0ea5e9;border-radius:50%;animation:spin 0.8s linear infinite;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .error-msg{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;color:#dc2626;font-size:13px;margin-bottom:12px;}
+.filter-chip {
+  display: flex;
+  align-items: center;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  height: 34px;
+  overflow: hidden;
+  gap: 0;
+}
 
-  /* Trend arrows on stat cards */
-  .stat-trend{font-size:11px;font-weight:400;margin-top:3px;display:flex;align-items:center;gap:3px;}
-  .trend-up{color:#059669;font-weight:400;} .trend-down{color:#dc2626;font-weight:400;} .trend-flat{color:#94a3b8;font-weight:400;}
+.filter-chip-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-4);
+  padding: 0 10px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+  white-space: nowrap;
+}
 
-  /* Funnel */
-  .funnel-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
-  .funnel-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
-  .funnel-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:14px;}
-  .funnel-stages{display:flex;align-items:stretch;gap:0;}
-  .funnel-stage{flex:1;position:relative;}
-  .funnel-bar-wrap{height:54px;display:flex;align-items:flex-end;padding:0 6px 0 0;}
-  .funnel-bar{width:100%;border-radius:6px 6px 0 0;transition:height 0.4s ease;min-height:4px;}
-  .funnel-arrow{display:flex;align-items:center;justify-content:center;padding:4px 0;color:#94a3b8;font-size:18px;flex-shrink:0;width:22px;align-self:center;}
-  .funnel-label{font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
-  .funnel-val{font-size:20px;font-weight:700;color:#0f172a;line-height:1.1;}
-  .funnel-drop{font-size:11px;font-weight:600;margin-top:2px;}
-  .funnel-drop.drop-good{color:#059669;} .funnel-drop.drop-bad{color:#dc2626;} .funnel-drop.drop-na{color:#94a3b8;}
-  .funnel-row{display:flex;align-items:center;}
+.filter-chip-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  padding: 0 10px;
+  white-space: nowrap;
+}
 
-  /* Trend line chart */
-  .trend-chart-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 10px;margin-bottom:12px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
-  .trend-chart-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
-  .trend-chart-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:10px;}
-  .trend-svg-wrap{overflow-x:auto;}
+.filter-nav {
+  width: 30px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-4);
+  font-size: 16px;
+  border-left: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
 
-  /* Goal tracker */
-  .goal-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
-  .goal-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
-  .goal-label{font-size:11px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;}
-  .goal-title{font-size:15px;font-weight:700;color:#0f172a;}
-  .goal-bar-wrap{flex:1;min-width:200px;}
-  .goal-track{background:#e2e8f0;border-radius:20px;height:18px;overflow:hidden;position:relative;}
-  .goal-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#0ea5e9,#38bdf8);transition:width 0.6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;}
-  .goal-fill-text{font-size:10px;font-weight:700;color:#fff;white-space:nowrap;}
-  .goal-stats{display:flex;gap:18px;align-items:center;flex-wrap:wrap;}
-  .goal-stat{text-align:center;}
-  .goal-stat .gval{font-size:22px;font-weight:700;color:#0f172a;line-height:1;}
-  .goal-stat .glabel{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.4px;font-weight:600;}
-  .goal-emoji{font-size:28px;}
+.filter-nav:hover { background: var(--border); color: var(--text-1); }
 
-  /* Insights / Streaks */
-  .insights-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:14px 16px;margin-bottom:12px;transition:transform 0.2s ease,box-shadow 0.2s ease,border-color 0.2s ease;cursor:default;}
-  .insights-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(14,165,233,0.12);border-color:#0ea5e9;}
-  .insights-card h3{font-size:13px;font-weight:600;color:#0f172a;margin-bottom:10px;}
-  .insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
-  .insight-chip{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;}
-  .insight-chip .ic-icon{font-size:18px;margin-bottom:4px;}
-  .insight-chip .ic-val{font-size:16px;font-weight:700;color:#0f172a;line-height:1.2;}
-  .insight-chip .ic-label{font-size:11px;color:#94a3b8;margin-top:2px;}
-  .insight-chip.highlight{border-color:#0ea5e9;background:#f0f9ff;}
-  .insight-chip.warn{border-color:#fca5a5;background:#fff5f5;}
-  .insight-chip.good{border-color:#6ee7b7;background:#f0fdf4;}
+select.filter-select {
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  padding: 0 10px;
+  height: 100%;
+  outline: none;
+  cursor: pointer;
+  min-width: 140px;
+  font-family: inherit;
+}
 
-  @media(max-width:1100px){.stats-grid{grid-template-columns:repeat(4,1fr);grid-template-rows:auto auto;}.charts-row{grid-template-columns:1fr;}}
-  @media(max-width:768px){.main{padding:12px;}.stats-grid{grid-template-columns:repeat(2,1fr);}.top-grid{grid-template-columns:1fr;}.topbar{flex-direction:column;align-items:flex-start;}.topbar-right{width:100%;}.funnel-stages{flex-direction:column;}.funnel-arrow{transform:rotate(90deg);}}
+.filters-separator {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+}
+
+/* ── MAIN CONTENT ── */
+.main-content {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── ERROR ── */
+.error-msg {
+  background: var(--rose-lt);
+  border: 1px solid #FECACA;
+  border-left: 4px solid var(--rose);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: var(--rose);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── CARDS (base) ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-body {
+  padding: 16px 20px;
+}
+
+/* ── STAT CARDS ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  border-radius: 12px 0 0 12px;
+  background: var(--brand);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+  border-color: var(--brand-mid);
+}
+
+.stat-card:hover::before { opacity: 1; }
+
+.stat-info { flex: 1; }
+
+.stat-info label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--text-4);
+  display: block;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.stat-num {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-1);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.stat-trend {
+  font-size: 11px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 500;
+}
+
+.trend-up   { color: var(--emerald); }
+.trend-down { color: var(--rose); }
+.trend-flat { color: var(--text-4); }
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 12px;
+  margin-top: 2px;
+}
+
+.icon-blue   { background: var(--brand-lt); }
+.icon-purple { background: var(--purple-lt); }
+.icon-cyan   { background: var(--cyan-lt); }
+.icon-pink   { background: var(--pink-lt); }
+.icon-teal   { background: var(--teal-lt); }
+.icon-orange { background: var(--orange-lt); }
+.icon-indigo { background: var(--indigo-lt); }
+.icon-amber  { background: var(--amber-lt); }
+
+/* ── HIGHLIGHT CARDS (top 3) ── */
+.highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.highlight-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+.highlight-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand), var(--purple), var(--emerald));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.highlight-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+  border-color: var(--brand-mid);
+}
+
+.highlight-card:hover::after { opacity: 1; }
+
+.hc-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-4);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.hc-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hc-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* ── GOAL CARD ── */
+.goal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.goal-card:hover { box-shadow: var(--shadow); }
+
+.goal-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-4);
+  margin-bottom: 4px;
+}
+
+.goal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-1);
+  white-space: nowrap;
+}
+
+.goal-bar-wrap { flex: 1; min-width: 200px; }
+
+.goal-bar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.goal-bar-label-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.goal-pct {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+}
+
+.goal-track {
+  background: var(--border);
+  border-radius: 20px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(90deg, var(--brand), #60A5FA);
+  transition: width 0.6s ease;
+  position: relative;
+}
+
+.goal-subtext {
+  font-size: 11px;
+  color: var(--text-4);
+  margin-top: 5px;
+}
+
+.goal-stats { display: flex; gap: 20px; flex-shrink: 0; }
+
+.goal-stat { text-align: center; }
+
+.goal-stat .gval {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-1);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.goal-stat .glabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-4);
+  margin-top: 3px;
+}
+
+/* ── CHARTS ROW ── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.donut-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.donut-svg { flex-shrink: 0; width: 210px; height: 210px; }
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  overflow-y: auto;
+  max-height: 210px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-2);
+  padding: 2px 0;
+}
+
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+.legend-val  { font-weight: 700; color: var(--text-1); font-size: 12px; }
+
+/* ── LEADERBOARD / TABLE ── */
+.leaderboard-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.lb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lb-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.lb-sort {
+  font-size: 11px;
+  color: var(--text-4);
+  font-weight: 500;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+
+thead tr { border-bottom: 1px solid var(--border); background: var(--surface2); }
+
+th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-4);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+th:hover, th.sorted { color: var(--brand); }
+
+td {
+  padding: 10px 12px;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface2); }
+
+.rank-num { font-weight: 700; color: var(--text-4); }
+.rank-1 { color: #F59E0B; font-size: 13px; }
+.rank-2 { color: #94A3B8; }
+.rank-3 { color: #B45309; }
+
+.agent-name {
+  font-weight: 600;
+  color: var(--text-1);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 5px;
+  transition: color 0.15s, background 0.15s;
+  display: inline-block;
+}
+
+.agent-name:hover { color: var(--brand); background: var(--brand-lt); }
+
+.lb-name-wrap { display: inline-flex; align-items: center; gap: 0; }
+.lb-name-wrap:hover .agent-name { color: var(--brand); background: var(--brand-lt); }
+.lb-name-wrap:hover .lb-spark { opacity: 1; }
+
+.lb-spark {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1.5px;
+  height: 14px;
+  vertical-align: middle;
+  margin-left: 5px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.lb-spark-bar { width: 4px; background: var(--brand); border-radius: 1px; }
+
+.vob-pct { font-weight: 600; }
+.vob-high { color: var(--emerald); }
+.vob-mid  { color: var(--amber); }
+.vob-low  { color: var(--rose); }
+
+.admit-badge {
+  background: var(--emerald-lt);
+  color: #065F46;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  transition: all 0.15s;
+  display: inline-block;
+}
+
+.grand-total-row td {
+  background: linear-gradient(90deg, #F0F9FF, #EFF6FF);
+  border-top: 2px solid var(--brand);
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.grand-total-label { color: var(--brand); font-weight: 800; }
+.grand-total-admits {
+  background: var(--brand);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+/* ── TOOLTIP ── */
+.lb-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: var(--text-1);
+  color: #E2E8F0;
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 12px;
+  line-height: 1.7;
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.18s, transform 0.18s;
+  min-width: 210px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.lb-tooltip.visible { opacity: 1; transform: translateY(0); }
+.lb-tooltip-name { font-size: 13px; font-weight: 700; color: #60A5FA; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
+.lb-tooltip-row { display: flex; justify-content: space-between; gap: 20px; }
+.lb-tooltip-label { color: var(--text-4); }
+.lb-tooltip-val { font-weight: 600; color: #fff; }
+
+/* ── TREND CHART CARD ── */
+.trend-chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.trend-chart-card:hover { box-shadow: var(--shadow); }
+
+.trend-svg-wrap { overflow-x: auto; padding: 4px 0; }
+
+.chart-legend-row {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+/* ── FUNNEL ── */
+.funnel-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.funnel-card:hover { box-shadow: var(--shadow); }
+
+.funnel-body { padding: 20px 24px; }
+
+.funnel-row { display: flex; align-items: stretch; }
+.funnel-stage { flex: 1; }
+
+.funnel-bar-wrap { height: 64px; display: flex; align-items: flex-end; padding: 0 8px 0 0; }
+
+.funnel-bar {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.5s ease;
+  min-height: 4px;
+}
+
+.funnel-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+  color: var(--text-4);
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 26px;
+  align-self: center;
+  margin-bottom: 50px;
+}
+
+.funnel-info { padding: 10px 0 0 0; }
+.funnel-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-4); }
+.funnel-val { font-size: 22px; font-weight: 800; color: var(--text-1); line-height: 1.2; letter-spacing: -0.5px; margin-top: 2px; }
+.funnel-drop { font-size: 11px; font-weight: 600; margin-top: 3px; }
+.drop-good { color: var(--emerald); }
+.drop-bad  { color: var(--rose); }
+.drop-na   { color: var(--text-4); }
+
+/* ── INSIGHTS ── */
+.insights-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.insights-card:hover { box-shadow: var(--shadow); }
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.insight-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  transition: all 0.15s;
+}
+
+.insight-chip:hover { border-color: var(--brand-mid); background: var(--brand-lt); }
+.insight-chip .ic-icon { font-size: 18px; margin-bottom: 5px; }
+.insight-chip .ic-val { font-size: 15px; font-weight: 700; color: var(--text-1); line-height: 1.3; }
+.insight-chip .ic-label { font-size: 11px; color: var(--text-3); margin-top: 2px; font-weight: 500; }
+.insight-chip.highlight { border-color: #93C5FD; background: #EFF6FF; }
+.insight-chip.warn { border-color: #FCA5A5; background: #FFF5F5; }
+.insight-chip.good { border-color: #6EE7B7; background: #F0FDF4; }
+
+/* ── LOADING / SPINNER ── */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: var(--text-4);
+  font-size: 13px;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── AGENT SECTION ── */
+.agent-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-4);
+  font-size: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  font-weight: 500;
+}
+
+/* ── PERF TRACKER ── */
+.perf-tracker-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.section-header {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-4);
+  margin: 20px 0 10px;
+}
+
+.perf-score-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.perf-score-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+.perf-score-ring svg { transform: rotate(-90deg); }
+.perf-score-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.perf-score-num { font-size: 22px; font-weight: 800; color: var(--text-1); line-height: 1; }
+.perf-score-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-4); }
+
+.perf-score-detail { flex: 1; }
+.perf-score-title { font-size: 15px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
+.perf-score-sub { font-size: 12px; color: var(--text-3); line-height: 1.5; }
+
+.perf-score-grade {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.grade-s { background: var(--emerald-lt); color: #065F46; }
+.grade-a { background: var(--brand-lt); color: #1D4ED8; }
+.grade-b { background: var(--amber-lt); color: #92400E; }
+.grade-c { background: var(--rose-lt); color: #991B1B; }
+
+.perf-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+
+.perf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid;
+}
+
+.badge-gold   { background: var(--amber-lt);   color: #92400E; border-color: #FDE68A; }
+.badge-blue   { background: var(--brand-lt);   color: #1E40AF; border-color: #BFDBFE; }
+.badge-green  { background: var(--emerald-lt); color: #065F46; border-color: #A7F3D0; }
+.badge-purple { background: var(--purple-lt);  color: #5B21B6; border-color: #DDD6FE; }
+.badge-red    { background: var(--rose-lt);    color: #991B1B; border-color: #FECACA; }
+.badge-gray   { background: var(--surface2);   color: var(--text-3); border-color: var(--border); }
+
+.perf-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.perf-kpi {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: default;
+}
+
+.perf-kpi:hover { border-color: var(--brand-mid); background: var(--brand-lt); }
+.perf-kpi-icon { font-size: 18px; margin-bottom: 4px; }
+.perf-kpi-val { font-size: 20px; font-weight: 800; color: var(--text-1); line-height: 1.1; }
+.perf-kpi-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-4); margin-top: 3px; }
+.perf-kpi.kpi-good { border-color: #6EE7B7; background: #F0FDF4; }
+.perf-kpi.kpi-good .perf-kpi-val { color: var(--emerald); }
+.perf-kpi.kpi-warn { border-color: #FCD34D; background: #FFFBEB; }
+.perf-kpi.kpi-warn .perf-kpi-val { color: var(--amber); }
+.perf-kpi.kpi-bad { border-color: #FCA5A5; background: #FFF5F5; }
+.perf-kpi.kpi-bad .perf-kpi-val { color: var(--rose); }
+
+.perf-goals { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.perf-goal-item { display: flex; flex-direction: column; gap: 5px; }
+.perf-goal-top { display: flex; justify-content: space-between; align-items: baseline; }
+.perf-goal-name { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.perf-goal-nums { font-size: 11px; color: var(--text-4); font-weight: 500; }
+.perf-goal-track { background: var(--border); border-radius: 20px; height: 8px; overflow: hidden; }
+.perf-goal-fill { height: 100%; border-radius: 20px; transition: width 0.6s ease; }
+.fill-green  { background: linear-gradient(90deg, var(--emerald), #34D399); }
+.fill-blue   { background: linear-gradient(90deg, var(--brand), #60A5FA); }
+.fill-purple { background: linear-gradient(90deg, var(--purple), #A78BFA); }
+.fill-orange { background: linear-gradient(90deg, var(--orange), #FB923C); }
+
+.perf-vs-team {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.vs-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 14px; border: 1px solid var(--border); }
+.vs-item-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-4); margin-bottom: 5px; }
+.vs-item-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.vs-item-bar-track { flex: 1; background: var(--border); border-radius: 20px; height: 6px; overflow: hidden; }
+.vs-item-bar-fill { height: 100%; border-radius: 20px; background: var(--brand); transition: width 0.6s ease; }
+.vs-item-vals { font-size: 11px; color: var(--text-2); font-weight: 600; white-space: nowrap; }
+.vs-you { color: var(--brand); font-weight: 700; }
+.vs-avg { color: var(--text-4); }
+
+/* ── SECTION DIVIDERS ── */
+.section-gap { margin-bottom: 20px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1200px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .highlight-grid { grid-template-columns: 1fr; }
+  .topbar { flex-wrap: wrap; height: auto; padding: 12px 16px; }
+  .topbar-right { flex-wrap: wrap; }
+  .main-content { padding: 14px; }
+}
+
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .funnel-row { flex-direction: column; }
+  .funnel-arrow { transform: rotate(90deg); width: auto; }
+  .goal-card { flex-direction: column; }
+  .filters-bar { padding: 10px 14px; }
+  .topbar { padding: 10px 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ── FOCUS VISIBLE (WCAG) ── */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible, select:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 </style>
 </head>
 <body>
 
-<main class="main">
+<div class="app-shell">
+  <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-left">
-      <img class="brand-logo" src="data:image/png;base64,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" alt="Legacy Healing Center"/>
+    <div class="topbar-brand">
+<img class="brand-logo" src="data:image/png;base64,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" alt="Legacy Healing Center"/>
+      <div class="brand-divider"></div>
       <div class="brand-text">
         <div class="eyebrow">Agent Dashboard</div>
         <h1>Legacy Healing Center</h1>
       </div>
-      <nav class="topbar-nav">
-        <button class="nav-pill active" id="btn-section-team" onclick="setSection('team')">Team Stats</button>
-        <button class="nav-pill" id="btn-section-agent" onclick="setSection('agent')">Agent Stats</button>
-      </nav>
     </div>
+
+    <nav class="topbar-nav" aria-label="Main sections">
+      <button class="nav-pill active" id="btn-section-team" onclick="setSection('team')">Team Stats</button>
+      <button class="nav-pill" id="btn-section-agent" onclick="setSection('agent')">Agent Stats</button>
+    </nav>
+
     <div class="topbar-right">
-      <div class="info-box"><label>Latest Update</label><div class="info-val" id="info-latest">–</div></div>
-      <div class="info-box"><label>Active Scope</label><div class="info-val" id="info-scope">–</div></div>
-      <div class="info-box"><label>Last Synced</label><div class="info-val" id="info-synced">–</div></div>
-      <button class="btn-refresh" onclick="loadData()"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh</button>
+      <div class="info-chip"><label>Latest Update</label><div class="info-val" id="info-latest">–</div></div>
+      <div class="info-chip"><label>Active Scope</label><div class="info-val" id="info-scope">–</div></div>
+      <div class="info-chip"><label>Last Synced</label><div class="info-val" id="info-synced">–</div></div>
+      <button class="btn-refresh" onclick="loadData()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Refresh
+      </button>
     </div>
   </header>
 
-  <div class="filters">
+  <!-- FILTERS -->
+  <div class="filters-bar" role="toolbar" aria-label="Filters">
     <div class="view-toggle">
       <button class="btn-toggle active" id="btn-monthly" onclick="setView('monthly')">Monthly</button>
       <button class="btn-toggle" id="btn-alltime" onclick="setView('alltime')">All Time</button>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">Year</div>
-      <div class="filter-val" id="filter-year">2026</div>
+    <div class="filters-separator"></div>
+    <div class="filter-chip">
+      <div class="filter-chip-label">Year</div>
+      <div class="filter-chip-val" id="filter-year">2026</div>
     </div>
-    <div class="filter-group">
-      <div class="filter-label">Month</div>
-      <div class="filter-arrow" onclick="changeMonth(-1)">‹</div>
-      <div class="filter-val" id="filter-month">June</div>
-      <div class="filter-arrow" onclick="changeMonth(1)">›</div>
+    <div class="filter-chip">
+      <div class="filter-chip-label">Month</div>
+      <button class="filter-nav" onclick="changeMonth(-1)" aria-label="Previous month">‹</button>
+      <div class="filter-chip-val" id="filter-month">June</div>
+      <button class="filter-nav" onclick="changeMonth(1)" aria-label="Next month">›</button>
     </div>
-    <div class="filter-group" id="agent-filter-group" style="display:none;">
-      <div class="filter-label">Agent</div>
-      <select class="filter-select" id="filter-agent" onchange="renderAll()">
+    <div class="filter-chip" id="agent-filter-group" style="display:none;">
+      <div class="filter-chip-label">Agent</div>
+      <select class="filter-select" id="filter-agent" onchange="renderAll()" aria-label="Select agent">
         <option value="all">All agents</option>
       </select>
     </div>
   </div>
 
-  <div id="error-area"></div>
+  <!-- MAIN -->
+  <main class="main-content">
+    <div id="error-area"></div>
 
-  <div id="section-team">
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-info"><label>Total Inbound Answered Calls</label><div class="stat-num" id="s-calls">—</div><div class="stat-trend" id="t-calls"></div></div><div class="stat-icon icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/><polyline points="16 2 20 6 16 10" stroke="#2563eb"/><line x1="20" y1="6" x2="12" y2="6" stroke="#2563eb"/></svg></div></div>
-      <div class="stat-card"><div class="stat-info"><label>Total Outbound Calls</label><div class="stat-num" id="s-outbound">—</div><div class="stat-trend" id="t-outbound"></div></div><div class="stat-icon icon-teal"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/><polyline points="20 6 16 10 12 6" stroke="#0d9488"/><line x1="12" y1="6" x2="20" y2="6" stroke="#0d9488"/></svg></div></div>
-      <div class="stat-card"><div class="stat-info"><label>Total Calls VOB</label><div class="stat-num" id="s-calls-vob">—</div><div class="stat-trend" id="t-calls-vob"></div></div><div class="stat-icon icon-indigo"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div></div>
-      <div class="stat-card"><div class="stat-info"><label>Total Chats VOB</label><div class="stat-num" id="s-chats-vob">—</div><div class="stat-trend" id="t-chats-vob"></div></div><div class="stat-icon icon-amber"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg></div></div>
-      <div class="stat-card"><div class="stat-info"><label>Total VOB from Calls and Chats</label><div class="stat-num" id="s-vobs">—</div><div class="stat-trend" id="t-vobs"></div></div><div class="stat-icon icon-purple"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div></div>
-      <div class="stat-card"><div class="stat-info"><label>Total Admits from Calls</label><div class="stat-num" id="s-admits-calls">—</div><div class="stat-trend" id="t-admits-calls"></div></div><div class="stat-icon icon-cyan"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div></div>
-      <div class="stat-card"><div class="stat-info"><label>Total Admits Chats</label><div class="stat-num" id="s-admits-chats">—</div><div class="stat-trend" id="t-admits-chats"></div></div><div class="stat-icon icon-pink"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg></div></div>
-      <div class="stat-card"><div class="stat-info"><label>Total Admits from Calls and Chats</label><div class="stat-num" id="s-admits-total">—</div><div class="stat-trend" id="t-admits-total"></div></div><div class="stat-icon icon-orange"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div></div>
-    </div>
+    <!-- ═══ TEAM SECTION ═══ -->
+    <div id="section-team">
 
-    <div class="top-grid">
-      <div class="top-card"><div class="tc-label">Top Calls VOB Generator</div><div class="tc-name" id="top-calls-vob-name">—</div><div class="tc-sub" id="top-calls-vob-sub">—</div></div>
-      <div class="top-card"><div class="tc-label">Top Chats VOB Generator</div><div class="tc-name" id="top-chats-vob-name">—</div><div class="tc-sub" id="top-chats-vob-sub">—</div></div>
-      <div class="top-card"><div class="tc-label">Top Admit</div><div class="tc-name" id="top-admit-name">—</div><div class="tc-sub" id="top-admit-sub">—</div></div>
-    </div>
-
-    <!-- Goal Tracker -->
-    <div class="goal-card" id="goal-card">
-      <div>
-        <div class="goal-label">Monthly Target</div>
-        <div class="goal-title">🎯 Admit Goal Tracker</div>
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-info"><label>Total Inbound Answered Calls</label><div class="stat-num" id="s-calls">—</div><div class="stat-trend" id="t-calls"></div></div><div class="stat-icon icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/><polyline points="16 2 20 6 16 10" stroke="#2563eb"/><line x1="20" y1="6" x2="12" y2="6" stroke="#2563eb"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label>Total Outbound Calls</label><div class="stat-num" id="s-outbound">—</div><div class="stat-trend" id="t-outbound"></div></div><div class="stat-icon icon-teal"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/><polyline points="20 6 16 10 12 6" stroke="#0d9488"/><line x1="12" y1="6" x2="20" y2="6" stroke="#0d9488"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label>Total Calls VOB</label><div class="stat-num" id="s-calls-vob">—</div><div class="stat-trend" id="t-calls-vob"></div></div><div class="stat-icon icon-indigo"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label>Total Chats VOB</label><div class="stat-num" id="s-chats-vob">—</div><div class="stat-trend" id="t-chats-vob"></div></div><div class="stat-icon icon-amber"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label>Total VOB from Calls &amp; Chats</label><div class="stat-num" id="s-vobs">—</div><div class="stat-trend" id="t-vobs"></div></div><div class="stat-icon icon-purple"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label>Total Admits from Calls</label><div class="stat-num" id="s-admits-calls">—</div><div class="stat-trend" id="t-admits-calls"></div></div><div class="stat-icon icon-cyan"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label>Total Admits from Chats</label><div class="stat-num" id="s-admits-chats">—</div><div class="stat-trend" id="t-admits-chats"></div></div><div class="stat-icon icon-pink"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg></div></div>
+        <div class="stat-card"><div class="stat-info"><label>Total Admits from Calls &amp; Chats</label><div class="stat-num" id="s-admits-total">—</div><div class="stat-trend" id="t-admits-total"></div></div><div class="stat-icon icon-orange"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div></div>
       </div>
-      <div class="goal-bar-wrap">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
-          <span style="font-size:12px;color:#64748b;font-weight:600;" id="goal-bar-label">0 / 30 admits</span>
-          <span style="font-size:11px;color:#94a3b8;" id="goal-pct-label">0%</span>
+
+      <!-- Top performers -->
+      <div class="highlight-grid">
+        <div class="highlight-card">
+          <div class="hc-eyebrow">🏆 Top Calls VOB Generator</div>
+          <div class="hc-name" id="top-calls-vob-name">—</div>
+          <div class="hc-sub" id="top-calls-vob-sub">—</div>
         </div>
-        <div class="goal-track">
-          <div class="goal-fill" id="goal-fill" style="width:0%">
-            <span class="goal-fill-text" id="goal-fill-text"></span>
+        <div class="highlight-card">
+          <div class="hc-eyebrow">💬 Top Chats VOB Generator</div>
+          <div class="hc-name" id="top-chats-vob-name">—</div>
+          <div class="hc-sub" id="top-chats-vob-sub">—</div>
+        </div>
+        <div class="highlight-card">
+          <div class="hc-eyebrow">🎯 Top Admit</div>
+          <div class="hc-name" id="top-admit-name">—</div>
+          <div class="hc-sub" id="top-admit-sub">—</div>
+        </div>
+      </div>
+
+      <!-- Goal Tracker -->
+      <div class="goal-card" id="goal-card">
+        <div style="flex-shrink:0;">
+          <div class="goal-label">Monthly Target</div>
+          <div class="goal-title">🎯 Admit Goal Tracker</div>
+        </div>
+        <div class="goal-bar-wrap">
+          <div class="goal-bar-top">
+            <span class="goal-bar-label-text" id="goal-bar-label">0 / 30 admits</span>
+            <span class="goal-pct" id="goal-pct-label">0%</span>
+          </div>
+          <div class="goal-track">
+            <div class="goal-fill" id="goal-fill" style="width:0%"></div>
+          </div>
+          <div class="goal-subtext" id="goal-subtext">—</div>
+        </div>
+        <div class="goal-stats">
+          <div class="goal-stat"><div class="gval" id="goal-current">—</div><div class="glabel">This Month</div></div>
+          <div class="goal-stat"><div class="gval" id="goal-remaining">—</div><div class="glabel">Remaining</div></div>
+          <div class="goal-stat"><div class="gval" id="goal-target">30</div><div class="glabel">Target</div></div>
+        </div>
+      </div>
+
+      <!-- Donut Charts -->
+      <div class="charts-row">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="admits-chart-title">Admits by Agent</div>
+          </div>
+          <div class="card-body">
+            <div class="donut-wrap">
+              <svg class="donut-svg" id="donut-admits" viewBox="0 0 180 180"></svg>
+              <div class="legend" id="legend-admits"></div>
+            </div>
           </div>
         </div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:4px;" id="goal-subtext">—</div>
-      </div>
-      <div class="goal-stats">
-        <div class="goal-stat"><div class="gval" id="goal-current">—</div><div class="glabel">This Month</div></div>
-        <div class="goal-stat"><div class="gval" id="goal-remaining">—</div><div class="glabel">Remaining</div></div>
-        <div class="goal-stat"><div class="gval" id="goal-target">30</div><div class="glabel">Target</div></div>
-      </div>
-    </div>
-
-    <div class="charts-row">
-      <div class="chart-card">
-        <h3 id="admits-chart-title">Admits by Agent</h3>
-        <div class="donut-wrap">
-          <svg class="donut-svg" id="donut-admits" viewBox="0 0 180 180"></svg>
-          <div class="legend" id="legend-admits"></div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <h3 id="vob-chart-title">VOB Rate by Agent</h3>
-        <div class="donut-wrap">
-          <svg class="donut-svg" id="donut-vob" viewBox="0 0 180 180"></svg>
-          <div class="legend" id="legend-vob"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="leaderboard-card" style="margin-bottom:12px;">
-      <div class="lb-header">
-        <h3><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:5px"><polyline points="8 6 2 6 2 12"/><path d="M2 12a10 10 0 0 0 20 0"/><polyline points="16 6 22 6 22 12"/><line x1="12" y1="22" x2="12" y2="17"/><line x1="8" y1="22" x2="16" y2="22"/></svg>Leaderboard — <span id="lb-period">June 2026</span></h3>
-        <div class="lb-sort" id="lb-sort-label">Ranked by Total Admits ↓ · VOB Rate ↓ (tiebreaker) · Click column to re-rank</div>
-      </div>
-      <div id="table-wrap"><div class="loading"><div class="spinner"></div> Loading data from Google Sheets...</div></div>
-    </div>
-
-    <!-- Team Trend Over Time -->
-    <div class="trend-chart-card" id="trend-chart-card">
-      <h3>📈 Team Performance Over Time (All Months)</h3>
-      <div class="trend-svg-wrap">
-        <svg id="trend-line-chart" style="display:block;"></svg>
-      </div>
-      <div style="display:flex;gap:18px;margin-top:8px;justify-content:center;flex-wrap:wrap;">
-        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Total Calls</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div><span>Total VOBs</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span>Total Admits</span></div>
-      </div>
-    </div>
-
-    <!-- Conversion Funnel -->
-    <div class="funnel-card" id="funnel-card">
-      <h3>📊 Conversion Funnel — <span id="funnel-period">June 2026</span></h3>
-      <div class="funnel-row">
-        <div class="funnel-stage">
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="funnel-bar-calls" style="background:#3b82f6;height:54px;"></div></div>
-          <div style="padding:8px 0 0 0;">
-            <div class="funnel-label">Total Calls</div>
-            <div class="funnel-val" id="funnel-calls">—</div>
-            <div class="funnel-drop drop-na" id="funnel-drop-calls">baseline</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="vob-chart-title">VOB Rate by Agent</div>
           </div>
-        </div>
-        <div class="funnel-arrow">›</div>
-        <div class="funnel-stage">
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="funnel-bar-vob" style="background:#8b5cf6;height:30px;"></div></div>
-          <div style="padding:8px 0 0 0;">
-            <div class="funnel-label">Total VOBs</div>
-            <div class="funnel-val" id="funnel-vobs">—</div>
-            <div class="funnel-drop" id="funnel-drop-vob">—</div>
-          </div>
-        </div>
-        <div class="funnel-arrow">›</div>
-        <div class="funnel-stage">
-          <div class="funnel-bar-wrap"><div class="funnel-bar" id="funnel-bar-admits" style="background:#10b981;height:10px;"></div></div>
-          <div style="padding:8px 0 0 0;">
-            <div class="funnel-label">Total Admits</div>
-            <div class="funnel-val" id="funnel-admits">—</div>
-            <div class="funnel-drop" id="funnel-drop-admits">—</div>
+          <div class="card-body">
+            <div class="donut-wrap">
+              <svg class="donut-svg" id="donut-vob" viewBox="0 0 180 180"></svg>
+              <div class="legend" id="legend-vob"></div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Insights & Streaks -->
-    <div class="insights-card" id="insights-card">
-      <h3>🔍 Team Insights &amp; Consistency</h3>
-      <div class="insights-grid" id="insights-grid">
-        <div class="insight-chip"><div class="ic-icon">⏳</div><div class="ic-val">Loading…</div><div class="ic-label">Calculating insights</div></div>
-      </div>
-    </div>
-
-  </div>
-
-  <div id="section-agent" style="display:none">
-    <div id="agent-empty" class="agent-empty" style="display:none">
-      Select a specific agent from the filter above to view their individual performance.
-    </div>
-    <div id="agent-content">
-      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-        <div class="stat-card"><div class="stat-info"><label id="a-calls-label">Total Calls</label><div class="stat-num" id="a-calls">0</div></div><div class="stat-icon icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div></div>
-        <div class="stat-card"><div class="stat-info"><label>Calls VOB</label><div class="stat-num" id="a-callsvob">0</div></div><div class="stat-icon icon-purple"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div></div>
-        <div class="stat-card"><div class="stat-info"><label id="a-vobpct-label">Avg VOB %</label><div class="stat-num" id="a-vobpct">0.0%</div></div><div class="stat-icon icon-orange"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div></div>
-        <div class="stat-card"><div class="stat-info"><label>Total Admits</label><div class="stat-num" id="a-admits">0</div></div><div class="stat-icon icon-teal"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div>
-      </div>
-
-      <div class="top-grid">
-        <div class="top-card"><div class="tc-label">🏆 Team Rank — Total Admits</div><div class="tc-name" id="a-rank">—</div><div class="tc-sub" id="a-rank-sub">—</div></div>
-        <div class="top-card"><div class="tc-label">📈 Calls vs Previous Month</div><div class="tc-name" id="a-trend">—</div><div class="tc-sub" id="a-trend-sub">—</div></div>
-        <div class="top-card"><div class="tc-label">⭐ Best Month — All Time</div><div class="tc-name" id="a-best">—</div><div class="tc-sub" id="a-best-sub">—</div></div>
-      </div>
-
-      <div class="chart-card" style="margin-bottom:12px;">
-        <h3>Monthly Performance (All Time)</h3>
-        <div style="overflow-x:auto;">
-          <svg id="agent-bar-chart" class="bar-chart-svg"></svg>
-        </div>
-        <div class="legend" style="flex-direction:row;flex-wrap:wrap;gap:14px;margin-top:10px;justify-content:center;max-height:none;">
-          <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span class="legend-name">Total Calls</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div><span class="legend-name">Calls VOB</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span class="legend-name">Chats VOB</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span class="legend-name">Total Admits</span></div>
-        </div>
-      </div>
-
+      <!-- Leaderboard -->
       <div class="leaderboard-card">
         <div class="lb-header">
-          <h3>Month-by-Month Breakdown — <span id="agent-name-display">—</span></h3>
+          <div class="lb-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 6 2 6 2 12"/><path d="M2 12a10 10 0 0 0 20 0"/><polyline points="16 6 22 6 22 12"/><line x1="12" y1="22" x2="12" y2="17"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+            Leaderboard — <span id="lb-period">June 2026</span>
+          </div>
+          <div class="lb-sort" id="lb-sort-label">Ranked by Total Admits ↓ · Click column to re-rank</div>
         </div>
-        <div id="agent-table-wrap"><div class="loading"><div class="spinner"></div> Loading data...</div></div>
+        <div id="table-wrap"><div class="loading"><div class="spinner"></div> Loading data from Google Sheets…</div></div>
       </div>
 
-      <!-- ── AGENT PERFORMANCE TRACKER ── -->
-      <div class="perf-tracker-card" id="perf-tracker-card" style="margin-top:12px;">
-        <h3>🚀 My Performance Tracker — <span id="perf-agent-name">—</span></h3>
-
-        <!-- Performance Score Ring -->
-        <div class="perf-score-wrap" id="perf-score-wrap">
-          <div class="perf-score-ring">
-            <svg width="80" height="80" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" fill="none" stroke="#e2e8f0" stroke-width="8"/>
-              <circle id="perf-ring-arc" cx="40" cy="40" r="34" fill="none" stroke="#0ea5e9" stroke-width="8"
-                stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"
-                style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s ease;"/>
-            </svg>
-            <div class="perf-score-text">
-              <div class="perf-score-num" id="perf-score-num">—</div>
-              <div class="perf-score-label">Score</div>
-            </div>
-          </div>
-          <div class="perf-score-detail">
-            <div class="perf-score-title" id="perf-score-title">Performance Overview</div>
-            <div class="perf-score-sub" id="perf-score-sub">Select an agent to view their performance score.</div>
-            <div id="perf-score-grade"></div>
+      <!-- Trend Line Chart -->
+      <div class="trend-chart-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Team Performance Over Time
           </div>
         </div>
-
-        <!-- Earned Badges -->
-        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">🏅 Earned Badges</div>
-        <div class="perf-badges" id="perf-badges">
-          <div class="perf-badge badge-gray">No badges yet — select an agent</div>
-        </div>
-
-        <!-- KPI Cards -->
-        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">📊 Key Metrics (All-Time)</div>
-        <div class="perf-kpi-grid" id="perf-kpi-grid">
-          <div class="perf-kpi"><div class="perf-kpi-icon">📞</div><div class="perf-kpi-val" id="pk-calls">—</div><div class="perf-kpi-label">Total Calls</div></div>
-          <div class="perf-kpi"><div class="perf-kpi-icon">✅</div><div class="perf-kpi-val" id="pk-vob">—</div><div class="perf-kpi-label">Total VOBs</div></div>
-          <div class="perf-kpi"><div class="perf-kpi-icon">🏥</div><div class="perf-kpi-val" id="pk-admits">—</div><div class="perf-kpi-label">Total Admits</div></div>
-          <div class="perf-kpi"><div class="perf-kpi-icon">📈</div><div class="perf-kpi-val" id="pk-vobpct">—</div><div class="perf-kpi-label">Avg VOB Rate</div></div>
-          <div class="perf-kpi"><div class="perf-kpi-icon">🌟</div><div class="perf-kpi-val" id="pk-bestmonth">—</div><div class="perf-kpi-label">Best Month (Admits)</div></div>
-          <div class="perf-kpi"><div class="perf-kpi-icon">📅</div><div class="perf-kpi-val" id="pk-months">—</div><div class="perf-kpi-label">Months Active</div></div>
-        </div>
-
-        <!-- Goal Progress Bars -->
-        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🎯 Monthly Goals (Current Month)</div>
-        <div class="perf-goals" id="perf-goals">
-          <div class="perf-goal-item">
-            <div class="perf-goal-top">
-              <span class="perf-goal-name">Calls Goal</span>
-              <span class="perf-goal-nums" id="pg-calls-nums">—</span>
-            </div>
-            <div class="perf-goal-track"><div class="perf-goal-fill fill-blue" id="pg-calls-bar" style="width:0%"></div></div>
-          </div>
-          <div class="perf-goal-item">
-            <div class="perf-goal-top">
-              <span class="perf-goal-name">VOB Goal</span>
-              <span class="perf-goal-nums" id="pg-vob-nums">—</span>
-            </div>
-            <div class="perf-goal-track"><div class="perf-goal-fill fill-purple" id="pg-vob-bar" style="width:0%"></div></div>
-          </div>
-          <div class="perf-goal-item">
-            <div class="perf-goal-top">
-              <span class="perf-goal-name">Admits Goal</span>
-              <span class="perf-goal-nums" id="pg-admits-nums">—</span>
-            </div>
-            <div class="perf-goal-track"><div class="perf-goal-fill fill-green" id="pg-admits-bar" style="width:0%"></div></div>
-          </div>
-          <div class="perf-goal-item">
-            <div class="perf-goal-top">
-              <span class="perf-goal-name">VOB Rate Goal (≥4%)</span>
-              <span class="perf-goal-nums" id="pg-rate-nums">—</span>
-            </div>
-            <div class="perf-goal-track"><div class="perf-goal-fill fill-orange" id="pg-rate-bar" style="width:0%"></div></div>
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="trend-svg-wrap">
+            <svg id="trend-line-chart" style="display:block;"></svg>
           </div>
         </div>
+        <div class="chart-legend-row">
+          <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Total Calls</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div><span>Total VOBs</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span>Total Admits</span></div>
+        </div>
+      </div>
 
-        <!-- You vs Team Average -->
-        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">⚡ You vs Team Average (This Month)</div>
-        <div class="perf-vs-team" id="perf-vs-team">
-          <div class="vs-item">
-            <div class="vs-item-label">Total Calls</div>
-            <div class="vs-item-bar-wrap">
-              <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-calls-bar" style="width:50%"></div></div>
-              <div class="vs-item-vals"><span class="vs-you" id="vt-calls-you">—</span> <span class="vs-avg">/ avg —</span></div>
-            </div>
+
+      <!-- Insights -->
+      <div class="insights-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Team Insights &amp; Consistency
           </div>
-          <div class="vs-item">
-            <div class="vs-item-label">VOBs</div>
-            <div class="vs-item-bar-wrap">
-              <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-vob-bar" style="width:50%"></div></div>
-              <div class="vs-item-vals"><span class="vs-you" id="vt-vob-you">—</span> <span class="vs-avg" id="vt-vob-avg">/ avg —</span></div>
-            </div>
+        </div>
+        <div class="insights-grid" id="insights-grid">
+          <div class="insight-chip"><div class="ic-icon">⏳</div><div class="ic-val">Loading…</div><div class="ic-label">Calculating insights</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ AGENT SECTION ═══ -->
+    <div id="section-agent" style="display:none">
+      <div id="agent-empty" class="agent-empty" style="display:none">
+        Select a specific agent from the filter above to view their individual performance.
+      </div>
+      <div id="agent-content">
+
+        <!-- Agent stat cards (4 col) -->
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
+          <div class="stat-card"><div class="stat-info"><label id="a-calls-label">Total Calls</label><div class="stat-num" id="a-calls">0</div></div><div class="stat-icon icon-blue"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.82a16 16 0 0 0 6.29 6.29l1.46-1.46a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.02z"/></svg></div></div>
+          <div class="stat-card"><div class="stat-info"><label>Calls VOB</label><div class="stat-num" id="a-callsvob">0</div></div><div class="stat-icon icon-purple"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div></div>
+          <div class="stat-card"><div class="stat-info"><label id="a-vobpct-label">Avg VOB %</label><div class="stat-num" id="a-vobpct">0.0%</div></div><div class="stat-icon icon-orange"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div></div>
+          <div class="stat-card"><div class="stat-info"><label>Total Admits</label><div class="stat-num" id="a-admits">0</div></div><div class="stat-icon icon-teal"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div>
+        </div>
+
+        <!-- Agent highlight cards -->
+        <div class="highlight-grid">
+          <div class="highlight-card"><div class="hc-eyebrow">🏆 Team Rank — Total Admits</div><div class="hc-name" id="a-rank">—</div><div class="hc-sub" id="a-rank-sub">—</div></div>
+          <div class="highlight-card"><div class="hc-eyebrow">📈 Calls vs Previous Month</div><div class="hc-name" id="a-trend">—</div><div class="hc-sub" id="a-trend-sub">—</div></div>
+          <div class="highlight-card"><div class="hc-eyebrow">⭐ Best Month — All Time</div><div class="hc-name" id="a-best">—</div><div class="hc-sub" id="a-best-sub">—</div></div>
+        </div>
+
+        <!-- Agent bar chart -->
+        <div class="card section-gap">
+          <div class="card-header">
+            <div class="card-title">Monthly Performance (All Time)</div>
           </div>
-          <div class="vs-item">
-            <div class="vs-item-label">Admits</div>
-            <div class="vs-item-bar-wrap">
-              <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-admits-bar" style="width:50%"></div></div>
-              <div class="vs-item-vals"><span class="vs-you" id="vt-admits-you">—</span> <span class="vs-avg" id="vt-admits-avg">/ avg —</span></div>
+          <div class="card-body">
+            <div style="overflow-x:auto;">
+              <svg id="agent-bar-chart" style="display:block;"></svg>
             </div>
-          </div>
-          <div class="vs-item">
-            <div class="vs-item-label">VOB Rate</div>
-            <div class="vs-item-bar-wrap">
-              <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-rate-bar" style="width:50%"></div></div>
-              <div class="vs-item-vals"><span class="vs-you" id="vt-rate-you">—</span> <span class="vs-avg" id="vt-rate-avg">/ avg —</span></div>
+            <div class="legend" style="flex-direction:row;flex-wrap:wrap;gap:14px;margin-top:12px;justify-content:center;max-height:none;overflow:visible;">
+              <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div><span>Total Calls</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div><span>Calls VOB</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span>Chats VOB</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span>Total Admits</span></div>
             </div>
           </div>
         </div>
 
+        <!-- Agent table -->
+        <div class="leaderboard-card">
+          <div class="lb-header">
+            <div class="lb-title">Month-by-Month Breakdown — <span id="agent-name-display">—</span></div>
+          </div>
+          <div id="agent-table-wrap"><div class="loading"><div class="spinner"></div> Loading data…</div></div>
+        </div>
+
+        <!-- Performance tracker -->
+        <div class="perf-tracker-card" id="perf-tracker-card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              Performance Tracker — <span id="perf-agent-name">—</span>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <!-- Score ring -->
+            <div class="perf-score-wrap" id="perf-score-wrap">
+              <div class="perf-score-ring">
+                <svg width="80" height="80" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="34" fill="none" stroke="#E2E8F0" stroke-width="8"/>
+                  <circle id="perf-ring-arc" cx="40" cy="40" r="34" fill="none" stroke="#2563EB" stroke-width="8"
+                    stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"
+                    style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s ease;"/>
+                </svg>
+                <div class="perf-score-text">
+                  <div class="perf-score-num" id="perf-score-num">—</div>
+                  <div class="perf-score-label">Score</div>
+                </div>
+              </div>
+              <div class="perf-score-detail">
+                <div class="perf-score-title" id="perf-score-title">Performance Overview</div>
+                <div class="perf-score-sub" id="perf-score-sub">Select an agent to view their performance score.</div>
+                <div id="perf-score-grade"></div>
+              </div>
+            </div>
+
+            <!-- Badges -->
+            <div class="section-header">🏅 Earned Badges</div>
+            <div class="perf-badges" id="perf-badges">
+              <div class="perf-badge badge-gray">No badges yet — select an agent</div>
+            </div>
+
+            <!-- KPI grid -->
+            <div class="section-header">📊 Key Metrics (All-Time)</div>
+            <div class="perf-kpi-grid" id="perf-kpi-grid">
+              <div class="perf-kpi"><div class="perf-kpi-icon">📞</div><div class="perf-kpi-val" id="pk-calls">—</div><div class="perf-kpi-label">Total Calls</div></div>
+              <div class="perf-kpi"><div class="perf-kpi-icon">✅</div><div class="perf-kpi-val" id="pk-vob">—</div><div class="perf-kpi-label">Total VOBs</div></div>
+              <div class="perf-kpi"><div class="perf-kpi-icon">🏥</div><div class="perf-kpi-val" id="pk-admits">—</div><div class="perf-kpi-label">Total Admits</div></div>
+              <div class="perf-kpi"><div class="perf-kpi-icon">📈</div><div class="perf-kpi-val" id="pk-vobpct">—</div><div class="perf-kpi-label">Avg VOB Rate</div></div>
+              <div class="perf-kpi"><div class="perf-kpi-icon">🌟</div><div class="perf-kpi-val" id="pk-bestmonth">—</div><div class="perf-kpi-label">Best Month (Admits)</div></div>
+              <div class="perf-kpi"><div class="perf-kpi-icon">📅</div><div class="perf-kpi-val" id="pk-months">—</div><div class="perf-kpi-label">Months Active</div></div>
+            </div>
+
+            <!-- Goal progress -->
+            <div class="section-header">🎯 Monthly Goals (Current Month)</div>
+            <div class="perf-goals" id="perf-goals">
+              <div class="perf-goal-item">
+                <div class="perf-goal-top"><span class="perf-goal-name">Calls Goal</span><span class="perf-goal-nums" id="pg-calls-nums">—</span></div>
+                <div class="perf-goal-track"><div class="perf-goal-fill fill-blue" id="pg-calls-bar" style="width:0%"></div></div>
+              </div>
+              <div class="perf-goal-item">
+                <div class="perf-goal-top"><span class="perf-goal-name">VOB Goal</span><span class="perf-goal-nums" id="pg-vob-nums">—</span></div>
+                <div class="perf-goal-track"><div class="perf-goal-fill fill-purple" id="pg-vob-bar" style="width:0%"></div></div>
+              </div>
+              <div class="perf-goal-item">
+                <div class="perf-goal-top"><span class="perf-goal-name">Admits Goal</span><span class="perf-goal-nums" id="pg-admits-nums">—</span></div>
+                <div class="perf-goal-track"><div class="perf-goal-fill fill-green" id="pg-admits-bar" style="width:0%"></div></div>
+              </div>
+              <div class="perf-goal-item">
+                <div class="perf-goal-top"><span class="perf-goal-name">VOB Rate Goal (≥4%)</span><span class="perf-goal-nums" id="pg-rate-nums">—</span></div>
+                <div class="perf-goal-track"><div class="perf-goal-fill fill-orange" id="pg-rate-bar" style="width:0%"></div></div>
+              </div>
+            </div>
+
+            <!-- You vs team avg -->
+            <div class="section-header">⚡ You vs Team Average (This Month)</div>
+            <div class="perf-vs-team" id="perf-vs-team">
+              <div class="vs-item">
+                <div class="vs-item-label">Total Calls</div>
+                <div class="vs-item-bar-wrap">
+                  <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-calls-bar" style="width:50%"></div></div>
+                  <div class="vs-item-vals"><span class="vs-you" id="vt-calls-you">—</span> <span class="vs-avg" id="vt-calls-avg">/ avg —</span></div>
+                </div>
+              </div>
+              <div class="vs-item">
+                <div class="vs-item-label">VOBs</div>
+                <div class="vs-item-bar-wrap">
+                  <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-vob-bar" style="width:50%"></div></div>
+                  <div class="vs-item-vals"><span class="vs-you" id="vt-vob-you">—</span> <span class="vs-avg" id="vt-vob-avg">/ avg —</span></div>
+                </div>
+              </div>
+              <div class="vs-item">
+                <div class="vs-item-label">Admits</div>
+                <div class="vs-item-bar-wrap">
+                  <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-admits-bar" style="width:50%"></div></div>
+                  <div class="vs-item-vals"><span class="vs-you" id="vt-admits-you">—</span> <span class="vs-avg" id="vt-admits-avg">/ avg —</span></div>
+                </div>
+              </div>
+              <div class="vs-item">
+                <div class="vs-item-label">VOB Rate</div>
+                <div class="vs-item-bar-wrap">
+                  <div class="vs-item-bar-track"><div class="vs-item-bar-fill" id="vt-rate-bar" style="width:50%"></div></div>
+                  <div class="vs-item-vals"><span class="vs-you" id="vt-rate-you">—</span> <span class="vs-avg" id="vt-rate-avg">/ avg —</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</main>
+  </main>
+</div>
 
-<!-- Leaderboard row tooltip -->
-<div class="lb-tooltip" id="lb-tooltip"></div>
+<!-- Tooltip -->
+<div class="lb-tooltip" id="lb-tooltip" role="tooltip" aria-live="polite"></div>
 
 <script>
 const API_KEY = 'AIzaSyDyOwIurmPpHRv-xRPlo87TO-l_lc1cZD4';
@@ -640,7 +1533,7 @@ function changeMonth(dir){
 
 async function loadData(){
   if(_firstLoad){
-    document.getElementById('table-wrap').innerHTML='<div class="loading"><div class="spinner"></div> Fetching from Google Sheets...</div>';
+    document.getElementById('table-wrap').innerHTML='<div class="loading"><div class="spinner"></div> Fetching from Google Sheets…</div>';
   }
   document.getElementById('error-area').innerHTML='';
   const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(RANGE)}?key=${API_KEY}`;
@@ -703,32 +1596,22 @@ function secondsToAht(sec){
   return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-// Collapse multiple month rows per agent into a single all-time totals row
 function aggregateByAgent(data){
   const map=new Map();
   data.forEach(r=>{
     if(!map.has(r.name)){
-      map.set(r.name,{
-        name:r.name,totalCalls:0,outbound:0,callsVOB:0,chatsVOB:0,
-        admitCalls:0,admitChats:0,totalAdmits:0,transfers:0,_ahtSecTotal:0
-      });
+      map.set(r.name,{name:r.name,totalCalls:0,outbound:0,callsVOB:0,chatsVOB:0,admitCalls:0,admitChats:0,totalAdmits:0,transfers:0,_ahtSecTotal:0});
     }
     const a=map.get(r.name);
-    a.totalCalls+=r.totalCalls;
-    a.outbound+=r.outbound;
-    a.callsVOB+=r.callsVOB;
-    a.chatsVOB+=r.chatsVOB;
-    a.admitCalls+=r.admitCalls;
-    a.admitChats+=r.admitChats;
-    a.totalAdmits+=r.totalAdmits;
-    a.transfers+=r.transfers;
+    a.totalCalls+=r.totalCalls; a.outbound+=r.outbound; a.callsVOB+=r.callsVOB;
+    a.chatsVOB+=r.chatsVOB; a.admitCalls+=r.admitCalls; a.admitChats+=r.admitChats;
+    a.totalAdmits+=r.totalAdmits; a.transfers+=r.transfers;
     a._ahtSecTotal+=ahtToSeconds(r.aht)*r.totalCalls;
   });
   return [...map.values()].map(a=>{
     a.vobPct=a.totalCalls>0?(a.callsVOB/a.totalCalls*100):0;
     a.aht=a.totalCalls>0?secondsToAht(a._ahtSecTotal/a.totalCalls):'0:00:00';
-    delete a._ahtSecTotal;
-    return a;
+    delete a._ahtSecTotal; return a;
   });
 }
 
@@ -753,7 +1636,6 @@ function renderAll(){
   document.getElementById('s-admits-chats').textContent=totAdmitChats;
   document.getElementById('s-admits-total').textContent=totAdmits;
 
-  // Month-over-month trend arrows on summary cards
   renderCardTrends(totCalls,totOutbound,totCallsVOB,totChatsVOB,totVOB,totAdmitCalls,totAdmitChats,totAdmits);
 
   const byCallsVOB=[...data].sort((a,b)=>b.callsVOB-a.callsVOB)[0];
@@ -770,12 +1652,10 @@ function renderAll(){
   set('lb-period',period);
   set('info-scope',period);
 
-  // New panels
   renderGoalTracker(totAdmits);
   renderFunnel(totCalls,totVOB,totAdmits,period);
   renderTrendLineChart();
   renderInsights();
-
   renderDonutAdmits(data,totAdmits);
   renderDonutVOB(data);
   renderTable(data);
@@ -783,7 +1663,6 @@ function renderAll(){
   if(currentSection==='agent') renderAgentSection();
 }
 
-// ── Trend arrows on summary cards ──────────────────────────────────────────
 function renderCardTrends(calls,outbound,cvob,chvob,vob,ac,ach,admits){
   if(currentView!=='monthly'){
     ['t-calls','t-outbound','t-calls-vob','t-chats-vob','t-vobs','t-admits-calls','t-admits-chats','t-admits-total'].forEach(id=>{
@@ -797,14 +1676,10 @@ function renderCardTrends(calls,outbound,cvob,chvob,vob,ac,ach,admits){
   const prev=allData.filter(r=>{const p=r.month.trim().split(' ');return p[0]===prevMonth&&p[1]===prevYear;});
   if(!prev.length) return;
   const p={
-    calls:prev.reduce((s,r)=>s+r.totalCalls,0),
-    outbound:prev.reduce((s,r)=>s+r.outbound,0),
-    cvob:prev.reduce((s,r)=>s+r.callsVOB,0),
-    chvob:prev.reduce((s,r)=>s+r.chatsVOB,0),
-    vob:prev.reduce((s,r)=>s+r.callsVOB+r.chatsVOB,0),
-    ac:prev.reduce((s,r)=>s+r.admitCalls,0),
-    ach:prev.reduce((s,r)=>s+r.admitChats,0),
-    admits:prev.reduce((s,r)=>s+r.totalAdmits,0)
+    calls:prev.reduce((s,r)=>s+r.totalCalls,0),outbound:prev.reduce((s,r)=>s+r.outbound,0),
+    cvob:prev.reduce((s,r)=>s+r.callsVOB,0),chvob:prev.reduce((s,r)=>s+r.chatsVOB,0),
+    vob:prev.reduce((s,r)=>s+r.callsVOB+r.chatsVOB,0),ac:prev.reduce((s,r)=>s+r.admitCalls,0),
+    ach:prev.reduce((s,r)=>s+r.admitChats,0),admits:prev.reduce((s,r)=>s+r.totalAdmits,0)
   };
   const pairs=[
     ['t-calls',calls,p.calls],['t-outbound',outbound,p.outbound],
@@ -817,18 +1692,14 @@ function renderCardTrends(calls,outbound,cvob,chvob,vob,ac,ach,admits){
     if(prev2===0){el.innerHTML=`<span class="trend-flat">— vs ${prevMonth}</span>`;return;}
     const pct=((cur-prev2)/prev2*100).toFixed(0);
     const up=cur>=prev2;
-    const cls=up?'trend-up':'trend-down';
-    const arrow=up?'▲':'▼';
-    el.innerHTML=`<span class="${cls}">${arrow}${Math.abs(pct)}% vs ${prevMonth}</span>`;
+    el.innerHTML=`<span class="${up?'trend-up':'trend-down'}">${up?'▲':'▼'}${Math.abs(pct)}% vs ${prevMonth}</span>`;
   });
 }
 
-// ── Goal Tracker ────────────────────────────────────────────────────────────
 const MONTHLY_ADMIT_TARGET=30;
 function renderGoalTracker(admits){
   const gc=document.getElementById('goal-card');
   if(!gc) return;
-  // Only show in monthly view
   if(currentView!=='monthly'){gc.style.display='none';return;}
   gc.style.display='flex';
   const pct=Math.min(Math.round((admits/MONTHLY_ADMIT_TARGET)*100),100);
@@ -836,23 +1707,20 @@ function renderGoalTracker(admits){
   document.getElementById('goal-fill').style.width=pct+'%';
   document.getElementById('goal-bar-label').textContent=`${admits} / ${MONTHLY_ADMIT_TARGET} admits`;
   document.getElementById('goal-pct-label').textContent=pct+'%';
-  document.getElementById('goal-fill-text').textContent=pct>=15?pct+'%':'';
   document.getElementById('goal-current').textContent=admits;
   document.getElementById('goal-remaining').textContent=remaining;
   document.getElementById('goal-target').textContent=MONTHLY_ADMIT_TARGET;
-  let emoji='⏳',sub='';
-  if(admits===0){emoji='😴';sub='No admits recorded yet this month';}
-  else if(admits>=MONTHLY_ADMIT_TARGET){emoji='🏆';sub='Goal crushed! Outstanding month!';}
-  else if(pct>=75){emoji='🔥';sub=`Almost there — ${remaining} more to hit the target!`;}
-  else if(pct>=50){emoji='💪';sub=`Halfway there — ${remaining} admits to go!`;}
-  else{emoji='⏳';sub=`${remaining} admits needed to reach the ${MONTHLY_ADMIT_TARGET}-admit goal`;}
+  let sub='';
+  if(admits===0) sub='No admits recorded yet this month';
+  else if(admits>=MONTHLY_ADMIT_TARGET) sub='Goal crushed! Outstanding month!';
+  else if(pct>=75) sub=`Almost there — ${remaining} more to hit the target!`;
+  else if(pct>=50) sub=`Halfway there — ${remaining} admits to go!`;
+  else sub=`${remaining} admits needed to reach the ${MONTHLY_ADMIT_TARGET}-admit goal`;
   document.getElementById('goal-subtext').textContent=sub;
-  // Color shift when goal met
   document.getElementById('goal-fill').style.background=admits>=MONTHLY_ADMIT_TARGET?
-    'linear-gradient(90deg,#059669,#34d399)':'linear-gradient(90deg,#0ea5e9,#38bdf8)';
+    'linear-gradient(90deg,#059669,#34d399)':'linear-gradient(90deg,#2563EB,#60A5FA)';
 }
 
-// ── Conversion Funnel ───────────────────────────────────────────────────────
 function renderFunnel(calls,vobs,admits,period){
   const fc=document.getElementById('funnel-card');
   if(!fc) return;
@@ -860,46 +1728,35 @@ function renderFunnel(calls,vobs,admits,period){
   set('funnel-calls',calls.toLocaleString());
   set('funnel-vobs',vobs.toLocaleString());
   set('funnel-admits',admits.toLocaleString());
-  const maxH=54;
+  const maxH=64;
   const vobBar=calls>0?Math.max((vobs/calls)*maxH,4):4;
   const adBar=calls>0?Math.max((admits/calls)*maxH,4):4;
   document.getElementById('funnel-bar-vob').style.height=vobBar+'px';
   document.getElementById('funnel-bar-admits').style.height=adBar+'px';
-  // Drop-off rates
   const vobRate=calls>0?(vobs/calls*100):0;
   const adFromVOB=vobs>0?(admits/vobs*100):0;
   const dv=document.getElementById('funnel-drop-vob');
   const da=document.getElementById('funnel-drop-admits');
-  if(calls>0){
-    dv.textContent=`${vobRate.toFixed(1)}% VOB rate`;
-    dv.className='funnel-drop '+(vobRate>=4?'drop-good':'drop-bad');
-  }else{dv.textContent='—';dv.className='funnel-drop drop-na';}
-  if(vobs>0){
-    da.textContent=`${adFromVOB.toFixed(1)}% close rate`;
-    da.className='funnel-drop '+(adFromVOB>=20?'drop-good':'drop-bad');
-  }else{da.textContent='—';da.className='funnel-drop drop-na';}
+  if(calls>0){dv.textContent=`${vobRate.toFixed(1)}% VOB rate`;dv.className='funnel-drop '+(vobRate>=4?'drop-good':'drop-bad');}
+  else{dv.textContent='—';dv.className='funnel-drop drop-na';}
+  if(vobs>0){da.textContent=`${adFromVOB.toFixed(1)}% close rate`;da.className='funnel-drop '+(adFromVOB>=20?'drop-good':'drop-bad');}
+  else{da.textContent='—';da.className='funnel-drop drop-na';}
 }
 
-// ── Team Performance Trend Line Chart ───────────────────────────────────────
 function renderTrendLineChart(){
   const svg=document.getElementById('trend-line-chart');
   if(!svg) return;
-  // Aggregate by month across all agents
   const monthMap=new Map();
   allData.forEach(r=>{
     const key=r.month.trim();
     if(!key) return;
     if(!monthMap.has(key)) monthMap.set(key,{calls:0,vob:0,admits:0});
     const m=monthMap.get(key);
-    m.calls+=r.totalCalls;
-    m.vob+=r.callsVOB+r.chatsVOB;
-    m.admits+=r.totalAdmits;
+    m.calls+=r.totalCalls; m.vob+=r.callsVOB+r.chatsVOB; m.admits+=r.totalAdmits;
   });
-  // Sort chronologically
   const sorted=[...monthMap.entries()].map(([k,v])=>{
     const p=k.split(' ');
-    return{label:k,shortLabel:(p[0]||'').slice(0,3)+' '+(p[1]||'').slice(2),
-      monthIdx:MONTHS.indexOf(p[0]),yearNum:parseInt(p[1])||0,...v};
+    return{label:k,shortLabel:(p[0]||'').slice(0,3)+' '+(p[1]||'').slice(2),monthIdx:MONTHS.indexOf(p[0]),yearNum:parseInt(p[1])||0,...v};
   }).sort((a,b)=>(a.yearNum-b.yearNum)||(a.monthIdx-b.monthIdx));
   if(sorted.length<2){svg.innerHTML='<text x="10" y="30" fill="#94a3b8" font-size="12">Not enough monthly data yet</text>';return;}
   const W=Math.max(500,sorted.length*80+80), H=200, padL=44,padR=16,padT=16,padB=36;
@@ -912,84 +1769,62 @@ function renderTrendLineChart(){
   const py=(v)=>padT+plotH-yScale(v);
   let grid='',axes='',lines='',dots='',xlabels='',ylabels='';
   for(let i=0;i<=4;i++){
-    const v=niceM*i/4;
-    const y=py(v);
-    grid+=`<line x1="${padL}" x2="${W-padR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3,3"/>`;
+    const v=niceM*i/4; const y=py(v);
+    grid+=`<line x1="${padL}" x2="${W-padR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#E2E8F0" stroke-dasharray="3,3"/>`;
     ylabels+=`<text x="${padL-6}" y="${(y+4).toFixed(1)}" text-anchor="end" font-size="10" fill="#94a3b8">${Math.round(v)}</text>`;
   }
-  axes=`<line x1="${padL}" x2="${padL}" y1="${padT}" y2="${padT+plotH}" stroke="#cbd5e1"/>
-    <line x1="${padL}" x2="${W-padR}" y1="${padT+plotH}" y2="${padT+plotH}" stroke="#cbd5e1"/>`;
+  axes=`<line x1="${padL}" x2="${padL}" y1="${padT}" y2="${padT+plotH}" stroke="#CBD5E1"/>
+    <line x1="${padL}" x2="${W-padR}" y1="${padT+plotH}" y2="${padT+plotH}" stroke="#CBD5E1"/>`;
   const series=[
-    {key:'calls',color:'#3b82f6',fill:'rgba(59,130,246,0.08)'},
-    {key:'vob',color:'#8b5cf6',fill:'rgba(139,92,246,0.08)'},
-    {key:'admits',color:'#10b981',fill:'rgba(16,185,129,0.12)'}
+    {key:'calls',color:'#3b82f6',fill:'rgba(59,130,246,0.07)'},
+    {key:'vob',color:'#8b5cf6',fill:'rgba(139,92,246,0.07)'},
+    {key:'admits',color:'#10b981',fill:'rgba(16,185,129,0.1)'}
   ];
   series.forEach(s=>{
     const pts=sorted.map((m,i)=>`${px(i).toFixed(1)},${py(m[s.key]).toFixed(1)}`).join(' ');
     const firstPt=`${px(0).toFixed(1)},${py(sorted[0][s.key]).toFixed(1)}`;
     const lastPt=`${px(sorted.length-1).toFixed(1)},${py(sorted[sorted.length-1][s.key]).toFixed(1)}`;
-    const fillPoly=`${firstPt} ${pts} ${lastPt} ${px(sorted.length-1).toFixed(1)},${(padT+plotH)} ${px(0).toFixed(1)},${padT+plotH}`;
+    const fillPoly=`${firstPt} ${pts} ${lastPt} ${px(sorted.length-1).toFixed(1)},${padT+plotH} ${px(0).toFixed(1)},${padT+plotH}`;
     lines+=`<polygon points="${fillPoly}" fill="${s.fill}" stroke="none"/>`;
     lines+=`<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
     sorted.forEach((m,i)=>{
-      dots+=`<circle cx="${px(i).toFixed(1)}" cy="${py(m[s.key]).toFixed(1)}" r="3.5" fill="${s.color}" stroke="#fff" stroke-width="1.5">
-        <title>${m.label}: ${m[s.key]}</title></circle>`;
+      dots+=`<circle cx="${px(i).toFixed(1)}" cy="${py(m[s.key]).toFixed(1)}" r="3.5" fill="${s.color}" stroke="#fff" stroke-width="1.5"><title>${m.label}: ${m[s.key]}</title></circle>`;
     });
   });
   sorted.forEach((m,i)=>{
     xlabels+=`<text x="${px(i).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#64748b">${m.shortLabel}</text>`;
   });
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
-  svg.setAttribute('width',W);
-  svg.setAttribute('height',H);
+  svg.setAttribute('width',W); svg.setAttribute('height',H);
   svg.innerHTML=grid+axes+ylabels+lines+dots+xlabels;
 }
 
-// ── Insights & Streaks ──────────────────────────────────────────────────────
 function renderInsights(){
   const grid=document.getElementById('insights-grid');
   if(!grid) return;
   if(!allData.length){grid.innerHTML='<div class="insight-chip"><div class="ic-icon">⏳</div><div class="ic-val">Waiting for data</div></div>';return;}
-
   const mIdx=MONTHS.indexOf(currentMonth);
   const curMonthData=allData.filter(r=>{const p=r.month.trim().split(' ');return p[0]===currentMonth&&p[1]===currentYear;});
   const prevMonth=MONTHS[(mIdx-1+12)%12];
   const prevYear=(mIdx===0)?String(parseInt(currentYear)-1):currentYear;
   const prevMonthData=allData.filter(r=>{const p=r.month.trim().split(' ');return p[0]===prevMonth&&p[1]===prevYear;});
-
   const chips=[];
-
-  // Agents with 0 VOBs this month
   const agentsZeroVOB=curMonthData.filter(r=>(r.callsVOB+r.chatsVOB)===0);
   if(agentsZeroVOB.length>0){
-    chips.push({cls:'warn',icon:'⚠️',val:`${agentsZeroVOB.length} agent${agentsZeroVOB.length>1?'s':''}`,
-      label:`hit 0 VOBs this month (${agentsZeroVOB.map(r=>r.name.split(' ')[0]).join(', ')})`});
+    chips.push({cls:'warn',icon:'⚠️',val:`${agentsZeroVOB.length} agent${agentsZeroVOB.length>1?'s':''}`,label:`hit 0 VOBs this month (${agentsZeroVOB.map(r=>r.name.split(' ')[0]).join(', ')})`});
   }else if(curMonthData.length>0){
     chips.push({cls:'good',icon:'✅',val:'All agents',label:'recorded at least 1 VOB this month'});
   }
-
-  // Top performer this month
   const topAdmitter=[...curMonthData].sort((a,b)=>b.totalAdmits-a.totalAdmits)[0];
-  if(topAdmitter && topAdmitter.totalAdmits>0){
-    chips.push({cls:'good',icon:'🏆',val:topAdmitter.name,label:`leads with ${topAdmitter.totalAdmits} admits this month`});
-  }
-
-  // Most improved admits vs last month
-  if(curMonthData.length && prevMonthData.length){
+  if(topAdmitter&&topAdmitter.totalAdmits>0) chips.push({cls:'good',icon:'🏆',val:topAdmitter.name,label:`leads with ${topAdmitter.totalAdmits} admits this month`});
+  if(curMonthData.length&&prevMonthData.length){
     let bestGain=null,bestGainVal=-Infinity;
     curMonthData.forEach(r=>{
       const prev=prevMonthData.find(p=>p.name===r.name);
-      if(prev){
-        const gain=r.totalAdmits-prev.totalAdmits;
-        if(gain>bestGainVal){bestGainVal=gain;bestGain=r;}
-      }
+      if(prev){const gain=r.totalAdmits-prev.totalAdmits;if(gain>bestGainVal){bestGainVal=gain;bestGain=r;}}
     });
-    if(bestGain && bestGainVal>0){
-      chips.push({cls:'highlight',icon:'📈',val:bestGain.name,label:`most improved: +${bestGainVal} admits vs ${prevMonth}`});
-    }
+    if(bestGain&&bestGainVal>0) chips.push({cls:'highlight',icon:'📈',val:bestGain.name,label:`most improved: +${bestGainVal} admits vs ${prevMonth}`});
   }
-
-  // Longest admit streak: agent with admits in most consecutive months
   const agentNames=[...new Set(allData.map(r=>r.name))];
   let longestStreakAgent='',longestStreak=0;
   agentNames.forEach(name=>{
@@ -1001,38 +1836,21 @@ function renderInsights(){
     rows.forEach(r=>{if(r.admits>0){streak++;maxS=Math.max(maxS,streak);}else{streak=0;}});
     if(maxS>longestStreak){longestStreak=maxS;longestStreakAgent=name;}
   });
-  if(longestStreakAgent && longestStreak>1){
-    chips.push({cls:'highlight',icon:'🔥',val:longestStreakAgent,label:`${longestStreak}-month admit streak (all-time)`});
-  }
-
-  // Agent with highest VOB rate this month
+  if(longestStreakAgent&&longestStreak>1) chips.push({cls:'highlight',icon:'🔥',val:longestStreakAgent,label:`${longestStreak}-month admit streak (all-time)`});
   const topVOB=[...curMonthData].filter(r=>r.totalCalls>0).sort((a,b)=>b.vobPct-a.vobPct)[0];
-  if(topVOB){
-    chips.push({cls:'good',icon:'📋',val:topVOB.name,label:`highest VOB rate: ${topVOB.vobPct.toFixed(1)}% this month`});
-  }
-
-  // Best team admits month ever
+  if(topVOB) chips.push({cls:'good',icon:'📋',val:topVOB.name,label:`highest VOB rate: ${topVOB.vobPct.toFixed(1)}% this month`});
   const monthTotals=new Map();
-  allData.forEach(r=>{
-    const k=r.month.trim();
-    monthTotals.set(k,(monthTotals.get(k)||0)+r.totalAdmits);
-  });
+  allData.forEach(r=>{const k=r.month.trim();monthTotals.set(k,(monthTotals.get(k)||0)+r.totalAdmits);});
   let bestMonth='',bestMonthVal=0;
   monthTotals.forEach((v,k)=>{if(v>bestMonthVal){bestMonthVal=v;bestMonth=k;}});
-  if(bestMonth){
-    chips.push({cls:'highlight',icon:'🌟',val:`${bestMonthVal} admits`,label:`best team month ever (${bestMonth})`});
-  }
-
-  if(!chips.length){chips.push({cls:'',icon:'📊',val:'More data needed',label:'insights will appear as months accumulate'});}
-
+  if(bestMonth) chips.push({cls:'highlight',icon:'🌟',val:`${bestMonthVal} admits`,label:`best team month ever (${bestMonth})`});
+  if(!chips.length) chips.push({cls:'',icon:'📊',val:'More data needed',label:'insights will appear as months accumulate'});
   grid.innerHTML=chips.map(c=>`<div class="insight-chip ${c.cls||''}">
     <div class="ic-icon">${c.icon}</div>
     <div class="ic-val">${c.val}</div>
     <div class="ic-label">${c.label}</div>
   </div>`).join('');
 }
-
-
 
 function set(id,txt){const el=document.getElementById(id);if(el)el.textContent=txt;}
 
@@ -1058,7 +1876,7 @@ function buildDonut(svgId,legendId,items,centerVal,centerLabel){
     angle+=slice;
   });
   svg.innerHTML=paths+
-    `<text x="90" y="87" text-anchor="middle" fill="#0f172a" font-size="21" font-weight="700">${centerVal}</text>`+
+    `<text x="90" y="87" text-anchor="middle" fill="#0F172A" font-size="21" font-weight="700">${centerVal}</text>`+
     `<text x="90" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">${centerLabel}</text>`;
   legend.innerHTML=items.map((item,i)=>
     `<div class="legend-item"><div class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></div><span class="legend-name">${item.name}</span><span class="legend-val">${item.display}</span></div>`
@@ -1066,14 +1884,12 @@ function buildDonut(svgId,legendId,items,centerVal,centerLabel){
 }
 
 function renderDonutAdmits(data,total){
-  const items=data.filter(d=>d.totalAdmits>0).sort((a,b)=>b.totalAdmits-a.totalAdmits)
-    .map(d=>({name:d.name,val:d.totalAdmits,display:d.totalAdmits}));
+  const items=data.filter(d=>d.totalAdmits>0).sort((a,b)=>b.totalAdmits-a.totalAdmits).map(d=>({name:d.name,val:d.totalAdmits,display:d.totalAdmits}));
   buildDonut('donut-admits','legend-admits',items,total,'Total Admits');
 }
 
 function renderDonutVOB(data){
-  const items=data.filter(d=>d.vobPct>0).sort((a,b)=>b.vobPct-a.vobPct)
-    .map(d=>({name:d.name,val:d.vobPct,display:d.vobPct.toFixed(1)+'%'}));
+  const items=data.filter(d=>d.vobPct>0).sort((a,b)=>b.vobPct-a.vobPct).map(d=>({name:d.name,val:d.vobPct,display:d.vobPct.toFixed(1)+'%'}));
   const totVOBs=data.reduce((s,d)=>s+d.callsVOB,0);
   const totCalls=data.reduce((s,d)=>s+d.totalCalls,0);
   const teamVOB=totCalls>0?((totVOBs/totCalls)*100).toFixed(2)+'%':'—';
@@ -1083,11 +1899,10 @@ function renderDonutVOB(data){
 function renderTable(data){
   updateSortLabel();
   const sorted=[...data].sort((a,b)=>{
-    // Default composite sort: Total Admits desc → VOB Rate desc as tiebreaker
     if(sortCol==='totalAdmits'){
-      const admitDiff = (b.totalAdmits - a.totalAdmits) * sortDir;
-      if(admitDiff !== 0) return admitDiff;
-      return (b.vobPct - a.vobPct) * sortDir; // higher VOB wins the tie
+      const admitDiff=(b.totalAdmits-a.totalAdmits)*sortDir;
+      if(admitDiff!==0) return admitDiff;
+      return (b.vobPct-a.vobPct)*sortDir;
     }
     return (b[sortCol]-a[sortCol])*sortDir;
   });
@@ -1105,38 +1920,24 @@ function renderTable(data){
     {key:'admitChats',label:'Admits (CH)',render:r=>r.admitChats||''},
     {key:'totalAdmits',label:'Total Admits',render:r=>r.totalAdmits?`<span class="admit-badge">${r.totalAdmits}</span>`:''},
   ];
-  if(!sorted.length){document.getElementById('table-wrap').innerHTML='<div style="padding:16px;color:#94a3b8;font-size:12px;">No data for this period.</div>';return;}
-
-  // Compute grand totals
-  const gt = {
-    totalCalls: sorted.reduce((s,r)=>s+r.totalCalls,0),
-    outbound:   sorted.reduce((s,r)=>s+r.outbound,0),
-    transfers:  sorted.reduce((s,r)=>s+r.transfers,0),
-    callsVOB:   sorted.reduce((s,r)=>s+r.callsVOB,0),
-    chatsVOB:   sorted.reduce((s,r)=>s+r.chatsVOB,0),
-    admitCalls: sorted.reduce((s,r)=>s+r.admitCalls,0),
-    admitChats: sorted.reduce((s,r)=>s+r.admitChats,0),
-    totalAdmits:sorted.reduce((s,r)=>s+r.totalAdmits,0)
+  if(!sorted.length){document.getElementById('table-wrap').innerHTML='<div style="padding:20px;color:#94a3b8;font-size:13px;font-weight:500;">No data for this period.</div>';return;}
+  const gt={
+    totalCalls:sorted.reduce((s,r)=>s+r.totalCalls,0),outbound:sorted.reduce((s,r)=>s+r.outbound,0),
+    transfers:sorted.reduce((s,r)=>s+r.transfers,0),callsVOB:sorted.reduce((s,r)=>s+r.callsVOB,0),
+    chatsVOB:sorted.reduce((s,r)=>s+r.chatsVOB,0),admitCalls:sorted.reduce((s,r)=>s+r.admitCalls,0),
+    admitChats:sorted.reduce((s,r)=>s+r.admitChats,0),totalAdmits:sorted.reduce((s,r)=>s+r.totalAdmits,0)
   };
-  gt.vobPct = gt.totalCalls>0 ? (gt.callsVOB/gt.totalCalls*100) : 0;
-
-  const gtRow = `<tr class="grand-total-row">
-    <td></td>
-    <td><span class="grand-total-label">GRAND TOTAL</span></td>
-    <td>${gt.totalCalls.toLocaleString()}</td>
-    <td>${gt.outbound.toLocaleString()}</td>
-    <td>${gt.transfers.toLocaleString()}</td>
-    <td>—</td>
-    <td>${gt.callsVOB}</td>
-    <td>${gt.chatsVOB}</td>
+  gt.vobPct=gt.totalCalls>0?(gt.callsVOB/gt.totalCalls*100):0;
+  const gtRow=`<tr class="grand-total-row">
+    <td></td><td><span class="grand-total-label">GRAND TOTAL</span></td>
+    <td>${gt.totalCalls.toLocaleString()}</td><td>${gt.outbound.toLocaleString()}</td>
+    <td>${gt.transfers.toLocaleString()}</td><td>—</td>
+    <td>${gt.callsVOB}</td><td>${gt.chatsVOB}</td>
     <td><span class="vob-pct ${gt.vobPct>=4?'vob-high':gt.vobPct>=2?'vob-mid':'vob-low'}">${gt.vobPct.toFixed(2)}%</span></td>
-    <td>${gt.admitCalls}</td>
-    <td>${gt.admitChats}</td>
+    <td>${gt.admitCalls}</td><td>${gt.admitChats}</td>
     <td><span class="grand-total-admits">${gt.totalAdmits}</span></td>
   </tr>`;
-
-  // Build mini sparkline bars (admits bar + vob bar)
-  const maxAdmits = Math.max(...sorted.map(r=>r.totalAdmits),1);
+  const maxAdmits=Math.max(...sorted.map(r=>r.totalAdmits),1);
   function sparkBars(r){
     const steps=[0.3,0.55,0.75,0.9,1.0];
     return steps.map(f=>{
@@ -1144,7 +1945,6 @@ function renderTable(data){
       return `<div class="lb-spark-bar" style="height:${Math.max(2,h)}px"></div>`;
     }).join('');
   }
-
   document.getElementById('table-wrap').innerHTML=`<div style="overflow-x:auto"><table>
     <thead><tr>${cols.map(c=>c.key==='#'?`<th>#</th>`:`<th class="${sortCol===c.key?'sorted':''}" onclick="sort('${c.key}')">${c.label}${sortCol===c.key?(sortDir===1?' ↓':' ↑'):''}</th>`).join('')}</tr></thead>
     <tbody>${sorted.map((r,i)=>`<tr class="lb-row" data-idx="${i}">${cols.map((c,ci)=>{
@@ -1152,17 +1952,13 @@ function renderTable(data){
       return `<td>${c.render(r,i)}</td>`;
     }).join('')}</tr>`).join('')}${gtRow}</tbody>
   </table></div>`;
-
-  // Attach tooltip events to AGENT NAME CELLS ONLY
-  const tooltip = document.getElementById('lb-tooltip');
+  const tooltip=document.getElementById('lb-tooltip');
   document.querySelectorAll('.lb-row').forEach((tr,i)=>{
-    const r = sorted[i];
-    if(!r) return;
-    const nameCell = tr.querySelector('.agent-name');
-    if(!nameCell) return;
-    const rankLabel = i===0?'🥇 1st':i===1?'🥈 2nd':i===2?'🥉 3rd':`#${i+1}`;
-    const vobCls = r.vobPct>=4?'#059669':r.vobPct>=2?'#d97706':'#dc2626';
-    nameCell.addEventListener('mouseenter', ()=>{
+    const r=sorted[i]; if(!r) return;
+    const nameCell=tr.querySelector('.agent-name'); if(!nameCell) return;
+    const rankLabel=i===0?'🥇 1st':i===1?'🥈 2nd':i===2?'🥉 3rd':`#${i+1}`;
+    const vobCls=r.vobPct>=4?'#059669':r.vobPct>=2?'#D97706':'#DC2626';
+    nameCell.addEventListener('mouseenter',()=>{
       tooltip.innerHTML=`
         <div class="lb-tooltip-name">${r.name}</div>
         <div class="lb-tooltip-row"><span class="lb-tooltip-label">Rank</span><span class="lb-tooltip-val">${rankLabel}</span></div>
@@ -1172,150 +1968,98 @@ function renderTable(data){
         <div class="lb-tooltip-row"><span class="lb-tooltip-label">VOB Rate</span><span class="lb-tooltip-val" style="color:${vobCls}">${r.vobPct.toFixed(2)}%</span></div>
         <div class="lb-tooltip-row"><span class="lb-tooltip-label">Admits (Calls)</span><span class="lb-tooltip-val">${r.admitCalls||0}</span></div>
         <div class="lb-tooltip-row"><span class="lb-tooltip-label">Admits (Chats)</span><span class="lb-tooltip-val">${r.admitChats||0}</span></div>
-        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Total Admits</span><span class="lb-tooltip-val" style="color:#059669">${r.totalAdmits}</span></div>
-      `;
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Total Admits</span><span class="lb-tooltip-val" style="color:#059669">${r.totalAdmits}</span></div>`;
       tooltip.classList.add('visible');
     });
-    nameCell.addEventListener('mousemove', e=>{
-      const pad=14;
-      let x=e.clientX+pad, y=e.clientY+pad;
+    nameCell.addEventListener('mousemove',e=>{
+      const pad=14; let x=e.clientX+pad, y=e.clientY+pad;
       const tw=tooltip.offsetWidth||220, th=tooltip.offsetHeight||180;
       if(x+tw>window.innerWidth-10) x=e.clientX-tw-pad;
       if(y+th>window.innerHeight-10) y=e.clientY-th-pad;
-      tooltip.style.left=x+'px';
-      tooltip.style.top=y+'px';
+      tooltip.style.left=x+'px'; tooltip.style.top=y+'px';
     });
     nameCell.addEventListener('mouseleave',()=>tooltip.classList.remove('visible'));
   });
 }
 
-
 function renderAgentSection(){
   const agentName=document.getElementById('filter-agent').value;
   const empty=document.getElementById('agent-empty');
   const content=document.getElementById('agent-content');
-
-  if(agentName==='all'){
-    empty.style.display='';
-    content.style.display='none';
-    return;
-  }
-  empty.style.display='none';
-  content.style.display='';
+  if(agentName==='all'){empty.style.display='';content.style.display='none';return;}
+  empty.style.display='none'; content.style.display='';
   set('agent-name-display',agentName);
-
-  // All-time data for this agent, sorted chronologically
   const agentRows=allData.filter(d=>d.name===agentName).map(d=>{
     const p=d.month.trim().split(' ');
-    return {...d,monthName:p[0]||'',yearNum:parseInt(p[1])||0,monthIdx:MONTHS.indexOf(p[0])};
+    return{...d,monthName:p[0]||'',yearNum:parseInt(p[1])||0,monthIdx:MONTHS.indexOf(p[0])};
   }).sort((a,b)=>(a.yearNum-b.yearNum)||(a.monthIdx-b.monthIdx));
-
-  // Stats for the currently selected month/year
-  const cur=agentRows.find(r=>r.monthName===currentMonth && r.yearNum===parseInt(currentYear));
+  const cur=agentRows.find(r=>r.monthName===currentMonth&&r.yearNum===parseInt(currentYear));
   set('a-calls-label',`Total Calls — ${currentMonth} ${currentYear}`);
   set('a-vobpct-label',`Avg VOB % — ${currentMonth} ${currentYear}`);
   set('a-calls',(cur?cur.totalCalls:0).toLocaleString());
   set('a-callsvob',(cur?cur.callsVOB:0).toLocaleString());
   set('a-vobpct',(cur?cur.vobPct:0).toFixed(1)+'%');
   set('a-admits',(cur?cur.totalAdmits:0).toLocaleString());
-
-  // Team rank this month (Total Admits desc, VOB% tiebreaker)
   const monthRows=allData.filter(d=>{const p=d.month.trim().split(' ');return p[0]===currentMonth&&p[1]===String(currentYear);});
   const ranked=[...monthRows].sort((a,b)=>(b.totalAdmits-a.totalAdmits)||(b.vobPct-a.vobPct));
   const rankIdx=ranked.findIndex(r=>r.name===agentName);
-  if(rankIdx>=0){
-    set('a-rank',`#${rankIdx+1} of ${ranked.length}`);
-    set('a-rank-sub',`${ranked[rankIdx].totalAdmits} admits this month`);
-  }else{
-    set('a-rank','—');
-    set('a-rank-sub',`No data for ${currentMonth} ${currentYear}`);
-  }
-
-  // Trend vs previous month
+  if(rankIdx>=0){set('a-rank',`#${rankIdx+1} of ${ranked.length}`);set('a-rank-sub',`${ranked[rankIdx].totalAdmits} admits this month`);}
+  else{set('a-rank','—');set('a-rank-sub',`No data for ${currentMonth} ${currentYear}`);}
   const curIdx=cur?agentRows.indexOf(cur):-1;
   if(curIdx>0){
     const prev=agentRows[curIdx-1];
     const trendEl=document.getElementById('a-trend');
-    if(prev.totalCalls===0){
-      trendEl.textContent='—';
-      set('a-trend-sub','No prior month data');
-    }else{
+    if(prev.totalCalls===0){trendEl.textContent='—';set('a-trend-sub','No prior month data');}
+    else{
       const diff=((cur.totalCalls-prev.totalCalls)/prev.totalCalls)*100;
       const up=diff>=0;
       trendEl.innerHTML=`<span class="${up?'trend-up':'trend-down'}">${up?'▲':'▼'} ${Math.abs(diff).toFixed(1)}%</span>`;
       set('a-trend-sub',`${prev.monthName} ${prev.yearNum}: ${prev.totalCalls} → ${cur.totalCalls} calls`);
     }
-  }else{
-    document.getElementById('a-trend').textContent='—';
-    set('a-trend-sub','Not enough history yet');
-  }
-
-  // Best month all-time
+  }else{document.getElementById('a-trend').textContent='—';set('a-trend-sub','Not enough history yet');}
   if(agentRows.length){
     const best=[...agentRows].sort((a,b)=>(b.totalAdmits-a.totalAdmits)||(b.vobPct-a.vobPct))[0];
     set('a-best',`${best.monthName} ${best.yearNum}`);
     set('a-best-sub',`${best.totalAdmits} total admits · ${best.vobPct.toFixed(2)}% VOB`);
-  }else{
-    set('a-best','—');
-    set('a-best-sub','No data yet');
-  }
-
+  }else{set('a-best','—');set('a-best-sub','No data yet');}
   buildAgentBarChart(agentRows);
   renderAgentTable(agentRows);
-  renderPerfTracker(agentName, agentRows, cur);
+  renderPerfTracker(agentName,agentRows,cur);
 }
 
-// ── PERFORMANCE TRACKER ──────────────────────────────────────
-function renderPerfTracker(agentName, agentRows, cur){
-  set('perf-agent-name', agentName);
-
-  // ── All-time aggregates ──
-  const totCalls  = agentRows.reduce((s,r)=>s+r.totalCalls,0);
-  const totVOB    = agentRows.reduce((s,r)=>s+(r.callsVOB+r.chatsVOB),0);
-  const totAdmits = agentRows.reduce((s,r)=>s+r.totalAdmits,0);
-  const avgVOBpct = totCalls>0 ? (agentRows.reduce((s,r)=>s+r.callsVOB,0)/totCalls*100) : 0;
-  const bestRow   = agentRows.length ? [...agentRows].sort((a,b)=>b.totalAdmits-a.totalAdmits)[0] : null;
-  const months    = agentRows.length;
-
-  // ── KPI cards ──
-  const kpiAdmitsCls = totAdmits>=10?'kpi-good':totAdmits>=5?'':'kpi-warn';
-  const kpiVOBCls    = avgVOBpct>=4?'kpi-good':avgVOBpct>=2?'kpi-warn':'kpi-bad';
-  const kpiCallsCls  = totCalls>=500?'kpi-good':totCalls>=200?'':'kpi-warn';
-
+function renderPerfTracker(agentName,agentRows,cur){
+  set('perf-agent-name',agentName);
+  const totCalls=agentRows.reduce((s,r)=>s+r.totalCalls,0);
+  const totVOB=agentRows.reduce((s,r)=>s+(r.callsVOB+r.chatsVOB),0);
+  const totAdmits=agentRows.reduce((s,r)=>s+r.totalAdmits,0);
+  const avgVOBpct=totCalls>0?(agentRows.reduce((s,r)=>s+r.callsVOB,0)/totCalls*100):0;
+  const bestRow=agentRows.length?[...agentRows].sort((a,b)=>b.totalAdmits-a.totalAdmits)[0]:null;
+  const months=agentRows.length;
+  const kpiAdmitsCls=totAdmits>=10?'kpi-good':totAdmits>=5?'':'kpi-warn';
+  const kpiVOBCls=avgVOBpct>=4?'kpi-good':avgVOBpct>=2?'kpi-warn':'kpi-bad';
+  const kpiCallsCls=totCalls>=500?'kpi-good':totCalls>=200?'':'kpi-warn';
   document.querySelectorAll('#perf-kpi-grid .perf-kpi').forEach((el,i)=>{
     el.className='perf-kpi';
     if(i===2) el.classList.add(kpiAdmitsCls);
     if(i===3) el.classList.add(kpiVOBCls);
     if(i===0) el.classList.add(kpiCallsCls);
   });
-
-  set('pk-calls', totCalls.toLocaleString());
-  set('pk-vob', totVOB.toLocaleString());
-  set('pk-admits', totAdmits.toLocaleString());
-  set('pk-vobpct', avgVOBpct.toFixed(2)+'%');
-  set('pk-bestmonth', bestRow ? `${bestRow.totalAdmits} (${bestRow.monthName} ${bestRow.yearNum})` : '—');
-  set('pk-months', months+' month'+(months!==1?'s':''));
-
-  // ── Performance Score (0–100) ──
-  // Weighted: Admits 40pts + VOB Rate 30pts + Calls 20pts + Consistency 10pts
-  const admitScore = Math.min(40, totAdmits * 4);
-  const vobScore   = Math.min(30, avgVOBpct / 4 * 30);
-  const callScore  = Math.min(20, (totCalls / 500) * 20);
-  // Consistency: % of months with at least 1 admit
-  const monthsWithAdmit = agentRows.filter(r=>r.totalAdmits>0).length;
-  const consScore  = months>0 ? Math.min(10, (monthsWithAdmit/months)*10) : 0;
-  const score      = Math.round(admitScore + vobScore + callScore + consScore);
-
-  const circumference = 213.6; // 2π×34
-  const offset = circumference - (score/100)*circumference;
-  const arc = document.getElementById('perf-ring-arc');
-  if(arc){
-    arc.style.strokeDashoffset = offset;
-    arc.style.stroke = score>=80?'#10b981':score>=60?'#3b82f6':score>=40?'#f59e0b':'#ef4444';
-  }
-  set('perf-score-num', score);
-
-  let grade, gradeClass, gradeEmoji, scoreSub;
+  set('pk-calls',totCalls.toLocaleString()); set('pk-vob',totVOB.toLocaleString());
+  set('pk-admits',totAdmits.toLocaleString()); set('pk-vobpct',avgVOBpct.toFixed(2)+'%');
+  set('pk-bestmonth',bestRow?`${bestRow.totalAdmits} (${bestRow.monthName} ${bestRow.yearNum})`:'—');
+  set('pk-months',months+' month'+(months!==1?'s':''));
+  const admitScore=Math.min(40,totAdmits*4);
+  const vobScore=Math.min(30,avgVOBpct/4*30);
+  const callScore=Math.min(20,(totCalls/500)*20);
+  const monthsWithAdmit=agentRows.filter(r=>r.totalAdmits>0).length;
+  const consScore=months>0?Math.min(10,(monthsWithAdmit/months)*10):0;
+  const score=Math.round(admitScore+vobScore+callScore+consScore);
+  const circumference=213.6;
+  const offset=circumference-(score/100)*circumference;
+  const arc=document.getElementById('perf-ring-arc');
+  if(arc){arc.style.strokeDashoffset=offset;arc.style.stroke=score>=80?'#10b981':score>=60?'#3b82f6':score>=40?'#f59e0b':'#ef4444';}
+  set('perf-score-num',score);
+  let grade,gradeClass,gradeEmoji,scoreSub;
   if(score>=80){grade='S — Elite';gradeClass='grade-s';gradeEmoji='🏆';scoreSub='Outstanding performance across all metrics.';}
   else if(score>=60){grade='A — Strong';gradeClass='grade-a';gradeEmoji='⭐';scoreSub='Above-average performer. Keep pushing!';}
   else if(score>=40){grade='B — Developing';gradeClass='grade-b';gradeEmoji='📈';scoreSub='Solid foundation. Focus on VOB rate and admits.';}
@@ -1323,84 +2067,55 @@ function renderPerfTracker(agentName, agentRows, cur){
   set('perf-score-title',`${gradeEmoji} Performance Score`);
   set('perf-score-sub',scoreSub);
   document.getElementById('perf-score-grade').innerHTML=`<div class="perf-score-grade ${gradeClass}">${grade}</div>`;
-
-  // ── Badges ──
-  const badges = [];
-  if(totAdmits>=20)  badges.push({cls:'badge-gold',icon:'🏆',label:'20+ Admits'});
+  const badges=[];
+  if(totAdmits>=20) badges.push({cls:'badge-gold',icon:'🏆',label:'20+ Admits'});
   else if(totAdmits>=10) badges.push({cls:'badge-green',icon:'🏅',label:'10+ Admits'});
-  if(avgVOBpct>=4)   badges.push({cls:'badge-blue',icon:'🎯',label:'4%+ VOB Rate'});
-  if(totCalls>=500)  badges.push({cls:'badge-purple',icon:'📞',label:'500+ Calls'});
-  if(months>=6)      badges.push({cls:'badge-blue',icon:'📅',label:'6+ Months Active'});
-  if(monthsWithAdmit===months && months>0) badges.push({cls:'badge-green',icon:'🔥',label:'Every Month Admits'});
-  if(bestRow && bestRow.totalAdmits>=5) badges.push({cls:'badge-gold',icon:'⭐',label:`${bestRow.totalAdmits} Admits in ${bestRow.monthName}`});
-  if(cur && cur.vobPct>=4) badges.push({cls:'badge-green',icon:'💚',label:'On Fire This Month'});
+  if(avgVOBpct>=4) badges.push({cls:'badge-blue',icon:'🎯',label:'4%+ VOB Rate'});
+  if(totCalls>=500) badges.push({cls:'badge-purple',icon:'📞',label:'500+ Calls'});
+  if(months>=6) badges.push({cls:'badge-blue',icon:'📅',label:'6+ Months Active'});
+  if(monthsWithAdmit===months&&months>0) badges.push({cls:'badge-green',icon:'🔥',label:'Every Month Admits'});
+  if(bestRow&&bestRow.totalAdmits>=5) badges.push({cls:'badge-gold',icon:'⭐',label:`${bestRow.totalAdmits} Admits in ${bestRow.monthName}`});
+  if(cur&&cur.vobPct>=4) badges.push({cls:'badge-green',icon:'💚',label:'On Fire This Month'});
   if(score>=80) badges.push({cls:'badge-gold',icon:'✨',label:'Elite Performer'});
-
-  document.getElementById('perf-badges').innerHTML = badges.length
-    ? badges.map(b=>`<div class="perf-badge ${b.cls}">${b.icon} ${b.label}</div>`).join('')
-    : '<div class="perf-badge badge-gray">📭 No badges yet — keep going!</div>';
-
-  // ── Monthly Goals (current month) ──
-  const GOALS = {calls:300, vob:12, admits:5, rate:4};
-  const curCalls  = cur?cur.totalCalls:0;
-  const curVOB    = cur?(cur.callsVOB+cur.chatsVOB):0;
-  const curAdmits = cur?cur.totalAdmits:0;
-  const curRate   = cur?cur.vobPct:0;
-
-  function setGoalBar(barId, numsId, val, goal){
-    const pct = Math.min(100, Math.round(val/goal*100));
-    const el = document.getElementById(barId);
-    if(el) el.style.width = pct+'%';
-    const numsEl = document.getElementById(numsId);
-    if(numsEl) numsEl.textContent = `${val} / ${goal} (${pct}%)`;
+  document.getElementById('perf-badges').innerHTML=badges.length
+    ?badges.map(b=>`<div class="perf-badge ${b.cls}">${b.icon} ${b.label}</div>`).join('')
+    :'<div class="perf-badge badge-gray">📭 No badges yet — keep going!</div>';
+  const GOALS={calls:300,vob:12,admits:5,rate:4};
+  const curCalls=cur?cur.totalCalls:0;
+  const curVOB=cur?(cur.callsVOB+cur.chatsVOB):0;
+  const curAdmits=cur?cur.totalAdmits:0;
+  const curRate=cur?cur.vobPct:0;
+  function setGoalBar(barId,numsId,val,goal){
+    const pct=Math.min(100,Math.round(val/goal*100));
+    const el=document.getElementById(barId); if(el) el.style.width=pct+'%';
+    const numsEl=document.getElementById(numsId); if(numsEl) numsEl.textContent=`${val} / ${goal} (${pct}%)`;
   }
-  setGoalBar('pg-calls-bar','pg-calls-nums', curCalls, GOALS.calls);
-  setGoalBar('pg-vob-bar',  'pg-vob-nums',   curVOB,   GOALS.vob);
+  setGoalBar('pg-calls-bar','pg-calls-nums',curCalls,GOALS.calls);
+  setGoalBar('pg-vob-bar','pg-vob-nums',curVOB,GOALS.vob);
   setGoalBar('pg-admits-bar','pg-admits-nums',curAdmits,GOALS.admits);
-  setGoalBar('pg-rate-bar', 'pg-rate-nums',  Math.round(curRate*10)/10, GOALS.rate);
-
-  // ── You vs Team Average ──
-  const monthRows = allData.filter(d=>{
-    const p=d.month.trim().split(' ');
-    return p[0]===currentMonth && p[1]===String(currentYear);
-  });
-  const n = monthRows.length || 1;
-  const avgCalls  = Math.round(monthRows.reduce((s,r)=>s+r.totalCalls,0)/n);
-  const avgVOB    = Math.round(monthRows.reduce((s,r)=>s+(r.callsVOB+r.chatsVOB),0)/n);
-  const avgAdmits = Math.round(monthRows.reduce((s,r)=>s+r.totalAdmits,0)*10/n)/10;
-  const avgRate   = Math.round(monthRows.reduce((s,r)=>s+r.vobPct,0)*100/n)/100;
-
-  function setVsBar(barId, youId, avgEl, you, avg){
-    const max = Math.max(you,avg,1);
-    const pct = Math.round(you/max*100);
+  setGoalBar('pg-rate-bar','pg-rate-nums',Math.round(curRate*10)/10,GOALS.rate);
+  const monthRows=allData.filter(d=>{const p=d.month.trim().split(' ');return p[0]===currentMonth&&p[1]===String(currentYear);});
+  const n=monthRows.length||1;
+  const avgCalls=Math.round(monthRows.reduce((s,r)=>s+r.totalCalls,0)/n);
+  const avgVOB=Math.round(monthRows.reduce((s,r)=>s+(r.callsVOB+r.chatsVOB),0)/n);
+  const avgAdmits=Math.round(monthRows.reduce((s,r)=>s+r.totalAdmits,0)*10/n)/10;
+  const avgRate=Math.round(monthRows.reduce((s,r)=>s+r.vobPct,0)*100/n)/100;
+  function setVsBar(barId,youId,avgId,you,avg){
+    const max=Math.max(you,avg,1);
+    const pct=Math.round(you/max*100);
     const barEl=document.getElementById(barId);
-    if(barEl){barEl.style.width=pct+'%';barEl.style.background=you>=avg?'#0ea5e9':'#f97316';}
-    const yEl=document.getElementById(youId);
-    if(yEl) yEl.textContent=you;
-    const aEl=document.getElementById(avgEl);
-    if(aEl) aEl.textContent=`/ avg ${avg}`;
+    if(barEl){barEl.style.width=pct+'%';barEl.style.background=you>=avg?'#2563EB':'#EA580C';}
+    const yEl=document.getElementById(youId); if(yEl) yEl.textContent=you;
+    const aEl=document.getElementById(avgId); if(aEl) aEl.textContent=`/ avg ${avg}`;
   }
-  setVsBar('vt-calls-bar','vt-calls-you','vt-calls-avg'.replace('avg','vt-calls-avg'), curCalls, avgCalls);
-  document.getElementById('vt-calls-you').textContent=curCalls;
-  document.getElementById('vt-calls-bar').style.width=Math.round(curCalls/Math.max(curCalls,avgCalls,1)*100)+'%';
-  document.getElementById('vt-calls-bar').style.background=curCalls>=avgCalls?'#0ea5e9':'#f97316';
-
-  document.getElementById('vt-vob-you').textContent=curVOB;
-  document.getElementById('vt-vob-avg').textContent=`/ avg ${avgVOB}`;
-  document.getElementById('vt-vob-bar').style.width=Math.round(curVOB/Math.max(curVOB,avgVOB,1)*100)+'%';
-  document.getElementById('vt-vob-bar').style.background=curVOB>=avgVOB?'#0ea5e9':'#f97316';
-
-  document.getElementById('vt-admits-you').textContent=curAdmits;
-  document.getElementById('vt-admits-avg').textContent=`/ avg ${avgAdmits}`;
-  document.getElementById('vt-admits-bar').style.width=Math.round(curAdmits/Math.max(curAdmits,avgAdmits,1)*100)+'%';
-  document.getElementById('vt-admits-bar').style.background=curAdmits>=avgAdmits?'#0ea5e9':'#f97316';
-
+  setVsBar('vt-calls-bar','vt-calls-you','vt-calls-avg',curCalls,avgCalls);
+  setVsBar('vt-vob-bar','vt-vob-you','vt-vob-avg',curVOB,avgVOB);
+  setVsBar('vt-admits-bar','vt-admits-you','vt-admits-avg',curAdmits,avgAdmits);
   document.getElementById('vt-rate-you').textContent=curRate.toFixed(2)+'%';
   document.getElementById('vt-rate-avg').textContent=`/ avg ${avgRate.toFixed(2)}%`;
   document.getElementById('vt-rate-bar').style.width=Math.round(curRate/Math.max(curRate,avgRate,0.1)*100)+'%';
-  document.getElementById('vt-rate-bar').style.background=curRate>=avgRate?'#0ea5e9':'#f97316';
+  document.getElementById('vt-rate-bar').style.background=curRate>=avgRate?'#2563EB':'#EA580C';
 }
-
 
 function niceCeil(v){
   if(v<=0) return 10;
@@ -1414,8 +2129,7 @@ function niceCeil(v){
 function buildAgentBarChart(rows){
   const svg=document.getElementById('agent-bar-chart');
   if(!rows.length){
-    svg.removeAttribute('width');
-    svg.setAttribute('viewBox','0 0 600 260');
+    svg.removeAttribute('width'); svg.setAttribute('viewBox','0 0 600 260');
     svg.innerHTML='<text x="300" y="130" text-anchor="middle" fill="#94a3b8" font-size="12">No data available for this agent</text>';
     return;
   }
@@ -1425,18 +2139,12 @@ function buildAgentBarChart(rows){
   const maxVal=Math.max(...rows.map(r=>r.totalCalls),1);
   const niceMax=niceCeil(maxVal);
   const groupW=plotW/rows.length;
-  const series=[
-    {key:'totalCalls',color:'#3b82f6'},
-    {key:'callsVOB',color:'#a855f7'},
-    {key:'chatsVOB',color:'#f97316'},
-    {key:'totalAdmits',color:'#10b981'}
-  ];
+  const series=[{key:'totalCalls',color:'#3b82f6'},{key:'callsVOB',color:'#a855f7'},{key:'chatsVOB',color:'#f97316'},{key:'totalAdmits',color:'#10b981'}];
   const barW=Math.min(13,(groupW-6)/series.length);
   let grid='',bars='',labels='';
   for(let i=0;i<=4;i++){
-    const v=niceMax*i/4;
-    const y=padT+plotH-(v/niceMax)*plotH;
-    grid+=`<line x1="${padL}" x2="${W-padR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3,3"/>`;
+    const v=niceMax*i/4; const y=padT+plotH-(v/niceMax)*plotH;
+    grid+=`<line x1="${padL}" x2="${W-padR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#E2E8F0" stroke-dasharray="3,3"/>`;
     grid+=`<text x="${padL-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-size="10" fill="#94a3b8">${Math.round(v)}</text>`;
   }
   rows.forEach((r,i)=>{
@@ -1445,62 +2153,41 @@ function buildAgentBarChart(rows){
     series.forEach((s,si)=>{
       const val=r[s.key]||0;
       const bh=Math.max((val/niceMax)*plotH,val>0?1:0);
-      const bx=groupStart+si*barW;
-      const by=padT+plotH-bh;
-      bars+=`<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(barW-1.5).toFixed(1)}" height="${bh.toFixed(1)}" fill="${s.color}" rx="1"/>`;
+      const bx=groupStart+si*barW; const by=padT+plotH-bh;
+      bars+=`<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(barW-1.5).toFixed(1)}" height="${bh.toFixed(1)}" fill="${s.color}" rx="2"/>`;
     });
     labels+=`<text x="${(gx+groupW/2).toFixed(1)}" y="${H-10}" text-anchor="middle" font-size="10" fill="#64748b">${r.monthName.slice(0,3)} ${r.yearNum}</text>`;
   });
-  const axes=`<line x1="${padL}" x2="${padL}" y1="${padT}" y2="${padT+plotH}" stroke="#cbd5e1"/><line x1="${padL}" x2="${W-padR}" y1="${padT+plotH}" y2="${padT+plotH}" stroke="#cbd5e1"/>`;
-  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
-  svg.setAttribute('width',W);
-  svg.setAttribute('height',H);
+  const axes=`<line x1="${padL}" x2="${padL}" y1="${padT}" y2="${padT+plotH}" stroke="#CBD5E1"/><line x1="${padL}" x2="${W-padR}" y1="${padT+plotH}" y2="${padT+plotH}" stroke="#CBD5E1"/>`;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.setAttribute('width',W); svg.setAttribute('height',H);
   svg.innerHTML=grid+axes+bars+labels;
 }
 
 function renderAgentTable(rows){
-  if(!rows.length){
-    document.getElementById('agent-table-wrap').innerHTML='<div style="padding:16px;color:#94a3b8;font-size:12px;">No data available for this agent yet.</div>';
-    return;
-  }
+  if(!rows.length){document.getElementById('agent-table-wrap').innerHTML='<div style="padding:16px;color:#94a3b8;font-size:13px;font-weight:500;">No data available for this agent yet.</div>';return;}
   const html=`<div style="overflow-x:auto"><table>
     <thead><tr><th>Month</th><th>Calls</th><th>Outbound</th><th>Calls VOB</th><th>Chats VOB</th><th>VOB%</th><th>Admits (Calls)</th><th>Admits (Chats)</th><th>Total Admits</th></tr></thead>
     <tbody>${[...rows].reverse().map(r=>`<tr>
-      <td>${r.monthName} ${r.yearNum}</td>
-      <td>${r.totalCalls.toLocaleString()}</td>
-      <td>${r.outbound.toLocaleString()}</td>
-      <td>${r.callsVOB}</td>
-      <td>${r.chatsVOB}</td>
+      <td>${r.monthName} ${r.yearNum}</td><td>${r.totalCalls.toLocaleString()}</td><td>${r.outbound.toLocaleString()}</td>
+      <td>${r.callsVOB}</td><td>${r.chatsVOB}</td>
       <td><span class="vob-pct ${r.vobPct>=4?'vob-high':r.vobPct>=2?'vob-mid':'vob-low'}">${r.vobPct.toFixed(2)}%</span></td>
-      <td>${r.admitCalls||''}</td>
-      <td>${r.admitChats||''}</td>
+      <td>${r.admitCalls||''}</td><td>${r.admitChats||''}</td>
       <td>${r.totalAdmits?`<span class="admit-badge">${r.totalAdmits}</span>`:''}</td>
     </tr>`).join('')}</tbody>
   </table></div>`;
   document.getElementById('agent-table-wrap').innerHTML=html;
 }
 
-const COL_LABELS = {
-  'totalCalls':'Total Calls','outbound':'Outbound','transfers':'Transfers',
-  'aht':'AHT','callsVOB':'Calls VOB','chatsVOB':'Chats VOB',
-  'vobPct':'VOB Rate','admitCalls':'Admits (Calls)','admitChats':'Admits (Chats)',
-  'totalAdmits':'Total Admits','name':'Agent'
-};
+const COL_LABELS={'totalCalls':'Total Calls','outbound':'Outbound','transfers':'Transfers','aht':'AHT','callsVOB':'Calls VOB','chatsVOB':'Chats VOB','vobPct':'VOB Rate','admitCalls':'Admits (Calls)','admitChats':'Admits (Chats)','totalAdmits':'Total Admits','name':'Agent'};
 
 function updateSortLabel(){
-  const el=document.getElementById('lb-sort-label');
-  if(!el) return;
-  if(sortCol==='totalAdmits' && sortDir===1){
-    el.textContent='Ranked by Total Admits ↓ · VOB Rate ↓ (tiebreaker) · Click column to re-rank';
-  } else {
-    const label=COL_LABELS[sortCol]||sortCol;
-    const arrow=sortDir===1?'↓':'↑';
-    el.textContent=`Ranked by ${label} ${arrow} · Click column to re-rank`;
-  }
+  const el=document.getElementById('lb-sort-label'); if(!el) return;
+  if(sortCol==='totalAdmits'&&sortDir===1){el.textContent='Ranked by Total Admits ↓ · VOB Rate ↓ (tiebreaker) · Click column to re-rank';}
+  else{el.textContent=`Ranked by ${COL_LABELS[sortCol]||sortCol} ${sortDir===1?'↓':'↑'} · Click column to re-rank`;}
 }
 
 function sort(col){
-  if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}
+  if(sortCol===col) sortDir*=-1; else{sortCol=col;sortDir=1;}
   renderAll();
 }
 
