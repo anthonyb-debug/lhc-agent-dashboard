@@ -1739,6 +1739,7 @@ function setSection(s){
   document.getElementById('section-team').style.display=s==='team'?'':'none';
   document.getElementById('section-agent').style.display=s==='agent'?'':'none';
   document.getElementById('agent-filter-group').style.display=s==='agent'?'':'none';
+  if(s==='team') document.getElementById('filter-agent').value='all';
   renderAll();
 }
 
@@ -2194,13 +2195,12 @@ function renderAgentOverview(){
 
   // Build agent cards
   const MEDAL=['🥇','🥈','🥉'];
-  const CARD_COLORS=['#2563EB','#7c3aed','#0891b2','#059669','#D97706','#db2777','#ea580c','#4F46E5','#0D9488','#DC2626','#3ca4cb','#cab16e','#b35e59','#708290'];
   const maxAdmits=ranked[0]?Math.max(ranked[0].totalAdmits,1):1;
   const grid=document.getElementById('ov-agent-grid');
   if(!grid) return;
   if(!ranked.length){grid.innerHTML='<div style="color:var(--text-4);font-size:13px;padding:8px;">No data for this period.</div>';return;}
   grid.innerHTML=ranked.map((a,i)=>{
-    const color=CARD_COLORS[i%CARD_COLORS.length];
+    const color=COLORS[i%COLORS.length];
     const medal=i<3?MEDAL[i]:`<span style="font-size:11px;font-weight:700;color:var(--text-4);">#${i+1}</span>`;
     const admitBar=Math.round((a.totalAdmits/maxAdmits)*100);
     const vobStatus=a.vobPct>=4?'#059669':a.vobPct>=2?'#D97706':'#DC2626';
@@ -2243,7 +2243,7 @@ function renderAgentOverview(){
   const admitsDist=document.getElementById('ov-admits-dist');
   if(admitsDist) admitsDist.innerHTML=ranked.map((a,i)=>{
     const pct=Math.round((a.totalAdmits/maxA)*100);
-    const color=CARD_COLORS[i%CARD_COLORS.length];
+    const color=COLORS[i%COLORS.length];
     return `<div>
       <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
         <span style="font-size:12px;font-weight:600;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">${a.name}</span>
@@ -2260,7 +2260,7 @@ function renderAgentOverview(){
   const callsDist=document.getElementById('ov-calls-dist');
   if(callsDist) callsDist.innerHTML=[...ranked].sort((a,b)=>b.totalCalls-a.totalCalls).map((a,i)=>{
     const pct=Math.round((a.totalCalls/maxC)*100);
-    const color=CARD_COLORS[i%CARD_COLORS.length];
+    const color=COLORS[i%COLORS.length];
     return `<div>
       <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
         <span style="font-size:12px;font-weight:600;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">${a.name}</span>
