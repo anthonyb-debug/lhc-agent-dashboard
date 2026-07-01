@@ -1362,7 +1362,7 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--brand); ou
     <div class="filter-chip">
       <div class="filter-chip-label">Month</div>
       <button class="filter-nav" onclick="changeMonth(-1)" aria-label="Previous month">‹</button>
-      <div class="filter-chip-val" id="filter-month">June</div>
+      <div class="filter-chip-val" id="filter-month">July 2026</div>
       <button class="filter-nav" onclick="changeMonth(1)" aria-label="Next month">›</button>
     </div>
     <div class="filter-chip" id="agent-filter-group" style="display:none;">
@@ -1723,7 +1723,10 @@ const RANGE = 'AGENT VOB ADMITS MTD!A:L';
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const COLORS = ['#3ca4cb', '#80cfe9', '#cab16e', '#d99573', '#b35e59', '#8bbfd5', '#708290', '#5f9ec1', '#a0c4d8', '#c9a870', '#e8a87c', '#7a9eb5', '#8faa7c', '#c4785a'];
 
-let allData=[], currentMonth='June', currentYear='2026', currentView='monthly', sortCol='totalAdmits', sortDir=1, currentSection='team', _firstLoad=true;
+const _now = new Date();
+let allData=[], currentMonth=MONTHS[_now.getMonth()], currentYear=String(_now.getFullYear()), currentView='monthly', sortCol='totalAdmits', sortDir=1, currentSection='team', _firstLoad=true;
+// Set filter display to current month on load
+document.addEventListener('DOMContentLoaded', function(){ const el=document.getElementById('filter-month'); if(el) el.textContent=currentMonth+' '+currentYear; });
 
 function setView(v){
   currentView=v;
@@ -1745,8 +1748,11 @@ function setSection(s){
 
 function changeMonth(dir){
   const idx=MONTHS.indexOf(currentMonth);
-  currentMonth=MONTHS[(idx+dir+12)%12];
-  document.getElementById('filter-month').textContent=currentMonth;
+  const newIdx=(idx+dir+12)%12;
+  if(dir===1 && idx===11) currentYear=String(parseInt(currentYear)+1);
+  if(dir===-1 && idx===0) currentYear=String(parseInt(currentYear)-1);
+  currentMonth=MONTHS[newIdx];
+  document.getElementById('filter-month').textContent=currentMonth+' '+currentYear;
   renderAll();
 }
 
