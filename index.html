@@ -2072,10 +2072,10 @@ function buildDonut(svgId,legendId,items,centerVal,centerLabel){
     if(slice<0.001){angle+=slice;return;}
     const color=COLORS[idx%COLORS.length];
     // Special case: single item fills the full circle — SVG arcs can't draw a
-    // full 360° arc when start===end, so we use two semicircular rings instead.
+    // full 360° arc when start===end, so use circle elements instead.
     if(Math.abs(slice-2*Math.PI)<0.0001){
-      paths+=`<path class="donut-seg" d="M${cx},${(cy-r).toFixed(2)} A${r},${r} 0 1,1 ${(cx-0.01).toFixed(2)},${(cy-r).toFixed(2)} Z" fill="${color}" stroke="none"/>`;
-      paths+=`<path d="M${cx},${(cy-ir).toFixed(2)} A${ir},${ir} 0 1,0 ${(cx-0.01).toFixed(2)},${(cy-ir).toFixed(2)} Z" fill="var(--surface)" stroke="none"/>`;
+      paths+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`;
+      paths+=`<circle cx="${cx}" cy="${cy}" r="${ir}" fill="var(--surface)"/>`;
       angle+=slice;return;
     }
     const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
