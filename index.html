@@ -1798,6 +1798,78 @@ const RANGE = 'AGENT VOB ADMITS MTD!A:L';
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const COLORS = ['#3ca4cb', '#80cfe9', '#cab16e', '#d99573', '#b35e59', '#8bbfd5', '#708290', '#5f9ec1', '#a0c4d8', '#c9a870', '#e8a87c', '#7a9eb5', '#8faa7c', '#c4785a'];
 
+/* ── AGENT PHOTO MAP ──────────────────────────────────────────────
+   Key   = agent name exactly as it appears in your Google Sheet
+   Value = direct URL to the agent's photo (Google Drive, CDN, etc.)
+
+   HOW TO GET A GOOGLE DRIVE PHOTO URL:
+   1. Upload the photo to Google Drive
+   2. Right-click → Share → Anyone with the link → Viewer
+   3. Copy the file ID from the URL:
+      https://drive.google.com/file/d/FILE_ID_HERE/view
+   4. Paste it below as:
+      'https://drive.google.com/thumbnail?id=FILE_ID_HERE&sz=w100'
+
+   Leave the map empty ({}) to keep initials for everyone.
+   Any agent not listed here will automatically show initials.
+─────────────────────────────────────────────────────────────────── */
+const AGENT_PHOTOS = {
+  // ── Use whichever name format matches your Google Sheet exactly ──
+
+  // "First Last" format
+  'Karen Perez':          'https://lh3.googleusercontent.com/d/1H2DWKVJlbrEJ2vAUEl5XW2npL3aQ2Q_H',
+  'Julia Mae Galong':     'https://lh3.googleusercontent.com/d/1eiuUqnuUKDoazdy0kA36_xnzb7MzQJXl',
+  'Shenelyn Buranis':     'https://lh3.googleusercontent.com/d/11XR0flOnHaFb6zhlQD7wR_u8SBPIakjT',
+  'Sean Bernardo':        'https://lh3.googleusercontent.com/d/1ngQYH6e5wd6XyFtTyCxfGnOs35aJ31ud',
+  'Rae Sagun':            'https://lh3.googleusercontent.com/d/1dcNTFtWCI8TSejCkh63MMYJvnNwdN55A',
+  'Larinz Padullano':     'https://lh3.googleusercontent.com/d/1_px4OHpKx2SdIGM3wB3NM6XHC8HLXu5t',
+  'Samuel Rapis':         'https://lh3.googleusercontent.com/d/145mvS-xp6fuo-yWMYiSEQ0BIJcHtNWoi',
+  'Rubie Magbanua':       'https://lh3.googleusercontent.com/d/19rQzBv8EEYpKCH5tmaJCMp2YdNaUF_Xj',
+  'Byron Jake Angel':     'https://lh3.googleusercontent.com/d/1Nk1JBuEdoH26w_BiIiTFvS7z72hYxj2s',
+  'Ma Cecilia Regla':     'https://lh3.googleusercontent.com/d/1nvFU7jHRVlxvyXVFj5NELnvEnUhIid-h',
+  'Ella Mae Lajo':        'https://lh3.googleusercontent.com/d/18mpAaayLUqGVVFRxJNL0m1758KmbD2_L',
+  'Ma Melanie Aban':      'https://lh3.googleusercontent.com/d/1PoMv9DLMKMmQOKtViCjwC1WGTkBtYqUh',
+  'Remington Villarta':   'https://lh3.googleusercontent.com/d/1hYaQZXTDBvad10bskgII8Zcr8K8Ve30s',
+  'Nikki Lumactod':       'https://lh3.googleusercontent.com/d/1pfZJOfGWRlsoDcaGn9i1kOmvvr6N-yVo',
+  'John Vincent Dujale':  'https://lh3.googleusercontent.com/d/1pZPgL6iVxM3ESm-Qgn7HlydSF8VNXG61',
+  'Stephanie Navarro':    'https://lh3.googleusercontent.com/d/1qj57VqzTh9eEDx1BCn_JJdwFz1gFbp4u',
+  'Maria Nelia Lopez':    'https://lh3.googleusercontent.com/d/1wbfqhNlp7QrtFacooSH5ID0smP_i_Oyr',
+
+  // "Last, First" format — delete this block if your sheet uses "First Last" above
+  'Perez, Karen':         'https://lh3.googleusercontent.com/d/1H2DWKVJlbrEJ2vAUEl5XW2npL3aQ2Q_H',
+  'Galong, Julia Mae':    'https://lh3.googleusercontent.com/d/1eiuUqnuUKDoazdy0kA36_xnzb7MzQJXl',
+  'Buranis, Shenelyn':    'https://lh3.googleusercontent.com/d/11XR0flOnHaFb6zhlQD7wR_u8SBPIakjT',
+  'Bernardo, Sean':       'https://lh3.googleusercontent.com/d/1ngQYH6e5wd6XyFtTyCxfGnOs35aJ31ud',
+  'Sagun, Rae':           'https://lh3.googleusercontent.com/d/1dcNTFtWCI8TSejCkh63MMYJvnNwdN55A',
+  'Padullano, Larinz':    'https://lh3.googleusercontent.com/d/1_px4OHpKx2SdIGM3wB3NM6XHC8HLXu5t',
+  'Rapis, Samuel':        'https://lh3.googleusercontent.com/d/145mvS-xp6fuo-yWMYiSEQ0BIJcHtNWoi',
+  'Magbanua, Rubie':      'https://lh3.googleusercontent.com/d/19rQzBv8EEYpKCH5tmaJCMp2YdNaUF_Xj',
+  'Angel, Byron Jake':    'https://lh3.googleusercontent.com/d/1Nk1JBuEdoH26w_BiIiTFvS7z72hYxj2s',
+  'Regla, Ma Cecilia':    'https://lh3.googleusercontent.com/d/1nvFU7jHRVlxvyXVFj5NELnvEnUhIid-h',
+  'Lajo, Ella Mae':       'https://lh3.googleusercontent.com/d/18mpAaayLUqGVVFRxJNL0m1758KmbD2_L',
+  'Aban, Ma Melanie':     'https://lh3.googleusercontent.com/d/1PoMv9DLMKMmQOKtViCjwC1WGTkBtYqUh',
+  'Villarta, Remington':  'https://lh3.googleusercontent.com/d/1hYaQZXTDBvad10bskgII8Zcr8K8Ve30s',
+  'Lumactod, Nikki':      'https://lh3.googleusercontent.com/d/1pfZJOfGWRlsoDcaGn9i1kOmvvr6N-yVo',
+  'Dujale, John Vincent': 'https://lh3.googleusercontent.com/d/1pZPgL6iVxM3ESm-Qgn7HlydSF8VNXG61',
+  'Navarro, Stephanie':   'https://lh3.googleusercontent.com/d/1qj57VqzTh9eEDx1BCn_JJdwFz1gFbp4u',
+  'Lopez, Maria Nelia':   'https://lh3.googleusercontent.com/d/1wbfqhNlp7QrtFacooSH5ID0smP_i_Oyr',
+};
+
+/* Returns an <img> if a photo URL exists, otherwise a colored initials div */
+function avatarHTML(name, size, color) {
+  size = size || 34;
+  const photo = AGENT_PHOTOS[name];
+  const initials = name.split(' ').map(n => n[0] || '').join('').toUpperCase().slice(0, 2);
+  const base = `border-radius:50%;width:${size}px;height:${size}px;flex-shrink:0;`;
+  if (photo) {
+    return `<img src="${photo}" alt="${initials}"
+      style="${base}object-fit:cover;border:2px solid ${color || 'var(--border)'};"
+      onerror="this.outerHTML='<div style=\\'${base}background:${color || '#3ca4cb'};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.35)}px;font-weight:800;color:#fff;\\'>${initials}</div>'"
+    />`;
+  }
+  return `<div style="${base}background:${color || '#3ca4cb'};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.35)}px;font-weight:800;color:#fff;">${initials}</div>`;
+}
+
 const _now = new Date();
 let allData=[], currentMonth=MONTHS[_now.getMonth()], currentYear=String(_now.getFullYear()), currentView='monthly', sortCol='totalAdmits', sortDir=1, currentSection='team', _firstLoad=true;
 // Set filter display to current month on load
@@ -2344,7 +2416,7 @@ function renderAgentOverview(){
       onmouseout="this.style.boxShadow='';this.style.transform='';this.style.borderLeftColor='${color}';this.style.borderTopColor='var(--border)';this.style.borderRightColor='var(--border)';this.style.borderBottomColor='var(--border)'"
     >
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <div style="width:34px;height:34px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;">${initials}</div>
+        ${avatarHTML(a.name, 34, color)}
         <div style="flex:1;min-width:0;">
           <div style="font-size:13px;font-weight:700;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.name}</div>
           <div style="font-size:11px;color:var(--text-4);font-weight:500;">${a.totalCalls.toLocaleString()} calls</div>
