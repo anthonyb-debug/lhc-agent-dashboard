@@ -406,40 +406,21 @@ body {
   flex-wrap: wrap;
 }
 
-.view-toggle {
-  display: flex;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 2px;
-  gap: 2px;
-}
-
-.btn-toggle {
-  padding: 5px 14px;
-  border-radius: 5px;
-  border: none;
-  background: transparent;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-3);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
-}
-
-.btn-toggle:hover { color: var(--text-1); }
-.btn-toggle.active { background: var(--surface); color: var(--brand); box-shadow: var(--shadow-sm); }
-
 .filter-chip {
   display: flex;
   align-items: center;
   background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 20px;
   height: 34px;
   overflow: hidden;
   gap: 0;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.filter-chip:hover {
+  border-color: var(--border2);
+  box-shadow: var(--shadow-sm);
 }
 
 .filter-chip-label {
@@ -455,13 +436,14 @@ body {
   align-items: center;
   background: var(--bg);
   white-space: nowrap;
+  border-radius: 20px 0 0 20px;
 }
 
 .filter-chip-val {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-1);
-  padding: 0 10px;
+  padding: 0 12px;
   white-space: nowrap;
 }
 
@@ -480,7 +462,33 @@ body {
   transition: all 0.15s;
 }
 
+.filter-nav:last-child { border-radius: 0 20px 20px 0; }
 .filter-nav:hover { background: var(--border); color: var(--text-1); }
+
+.view-toggle {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.btn-toggle {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.btn-toggle:hover { color: var(--text-1); }
+.btn-toggle.active { background: var(--surface); color: var(--brand); box-shadow: var(--shadow-sm); }
 
 select.filter-select {
   border: none;
@@ -658,14 +666,15 @@ select.filter-select {
   margin-top: 2px;
 }
 
-.icon-blue   { background: var(--brand-lt); }
-.icon-purple { background: var(--purple-lt); }
-.icon-cyan   { background: var(--cyan-lt); }
-.icon-pink   { background: var(--pink-lt); }
-.icon-teal   { background: var(--teal-lt); }
-.icon-orange { background: var(--orange-lt); }
-.icon-indigo { background: var(--indigo-lt); }
-.icon-amber  { background: var(--amber-lt); }
+.icon-blue    { background: var(--brand-lt); }
+.icon-purple  { background: var(--purple-lt); }
+.icon-cyan    { background: var(--cyan-lt); }
+.icon-pink    { background: var(--pink-lt); }
+.icon-teal    { background: var(--teal-lt); }
+.icon-orange  { background: var(--orange-lt); }
+.icon-indigo  { background: var(--indigo-lt); }
+.icon-amber   { background: var(--amber-lt); }
+.icon-emerald { background: var(--emerald-lt); }
 
 /* ── HIGHLIGHT CARDS (top 3) ── */
 .highlight-grid {
@@ -1172,11 +1181,29 @@ tbody tr:hover td { background: var(--surface2); }
   margin-bottom: 16px;
 }
 
-.perf-score-ring { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+.perf-score-ring { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
 .perf-score-ring svg { transform: rotate(-90deg); }
 .perf-score-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.perf-score-num { font-size: 22px; font-weight: 800; color: var(--text-1); line-height: 1; }
+.perf-score-num { font-size: 28px; font-weight: 800; color: var(--text-1); line-height: 1; }
 .perf-score-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-4); }
+
+/* ── DARK MODE DEPTH ── */
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .highlight-card,
+[data-theme="dark"] .card,
+[data-theme="dark"] .leaderboard-card,
+[data-theme="dark"] .perf-tracker-card,
+[data-theme="dark"] .goal-card,
+[data-theme="dark"] .trend-chart-card,
+[data-theme="dark"] .insights-card {
+  border-color: var(--border2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+}
+[data-theme="dark"] .stat-card:hover,
+[data-theme="dark"] .highlight-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3);
+  border-color: color-mix(in srgb, var(--card-accent, var(--brand)) 60%, var(--border2));
+}
 
 .perf-score-detail { flex: 1; }
 .perf-score-title { font-size: 15px; font-weight: 700; color: var(--text-1); margin-bottom: 4px; }
@@ -1272,8 +1299,26 @@ tbody tr:hover td { background: var(--surface2); }
 .vs-you { color: var(--brand); font-weight: 700; }
 .vs-avg { color: var(--text-4); }
 
-/* ── SECTION DIVIDERS ── */
-.section-gap { margin-bottom: 20px; }
+/* ── SECTION DIVIDERS & SPACING ── */
+.section-gap  { margin-bottom: 28px; }
+.section-block { margin-bottom: 32px; }
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-4);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1200px) {
@@ -1294,6 +1339,12 @@ tbody tr:hover td { background: var(--surface2); }
   .goal-card { flex-direction: column; }
   .filters-bar { padding: 10px 14px; }
   .topbar { padding: 10px 14px; }
+  .topbar-nav { order: 3; width: 100%; justify-content: center; }
+  .topbar-right { order: 2; }
+  .topbar-brand { order: 1; }
+  .nav-pill { flex: 1; text-align: center; }
+  .info-chip { display: none; }
+  .theme-toggle span.theme-toggle-icon + div { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1309,6 +1360,8 @@ tbody tr:hover td { background: var(--surface2); }
 }
 
 button:focus-visible, select:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+/* ── SCORE INFO TOOLTIP ── */
+.score-tip-visible { display:block !important; }
 </style>
 </head>
 <body>
@@ -1460,14 +1513,22 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--brand); ou
         </div>
       </div>
 
-      <!-- Leaderboard -->
       <div class="leaderboard-card">
         <div class="lb-header">
           <div class="lb-title">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 6 2 6 2 12"/><path d="M2 12a10 10 0 0 0 20 0"/><polyline points="16 6 22 6 22 12"/><line x1="12" y1="22" x2="12" y2="17"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
             Leaderboard — <span id="lb-period">June 2026</span>
           </div>
-          <div class="lb-sort" id="lb-sort-label">Ranked by Total Admits ↓ · Click column to re-rank</div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="position:relative;display:flex;align-items:center;">
+              <svg style="position:absolute;left:8px;pointer-events:none;" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-4)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="lb-search" type="text" placeholder="Search agent…" oninput="renderAll()"
+                style="padding:5px 10px 5px 28px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit;font-weight:500;color:var(--text-1);background:var(--surface2);outline:none;width:150px;transition:border-color 0.15s,box-shadow 0.15s;"
+                onfocus="this.style.borderColor='var(--brand)';this.style.boxShadow='0 0 0 3px var(--brand-lt)'"
+                onblur="this.style.borderColor='var(--border)';this.style.boxShadow=''"/>
+            </div>
+            <div class="lb-sort" id="lb-sort-label">Ranked by Total Admits ↓ · Click column to re-rank</div>
+          </div>
         </div>
         <div id="table-wrap"><div class="loading"><div class="spinner"></div> Loading data from Google Sheets…</div></div>
       </div>
@@ -1592,6 +1653,7 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--brand); ou
               <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div><span>Calls VOB</span></div>
               <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span>Chats VOB</span></div>
               <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div><span>Total Admits</span></div>
+              <div class="legend-item"><div style="width:18px;height:3px;background:#f43f5e;border-radius:2px;border-top:2px dashed #f43f5e;margin-top:1px;"></div><span style="color:#f43f5e;font-weight:600;">VOB% (right axis)</span></div>
             </div>
           </div>
         </div>
@@ -1610,6 +1672,19 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--brand); ou
             <div class="card-title">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
               Performance Tracker — <span id="perf-agent-name">—</span>
+              <div style="position:relative;display:inline-flex;align-items:center;margin-left:4px;" class="score-info-wrap">
+                <button aria-label="How is the score calculated?" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:var(--text-4);" onclick="document.getElementById('score-tooltip-box').classList.toggle('score-tip-visible')">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </button>
+                <div id="score-tooltip-box" style="display:none;position:absolute;top:22px;left:0;z-index:200;background:#1E2333;color:#E2E8F0;border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.7;box-shadow:0 10px 30px rgba(0,0,0,0.4);min-width:240px;border:1px solid rgba(255,255,255,0.1);">
+                  <div style="font-size:13px;font-weight:700;color:#60A5FA;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:6px;">📊 How the Score is Calculated</div>
+                  <div style="display:flex;justify-content:space-between;gap:16px;"><span style="color:#94A3B8;">Total Admits (all-time)</span><span style="font-weight:600;">up to 40 pts</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:16px;"><span style="color:#94A3B8;">Avg VOB Rate</span><span style="font-weight:600;">up to 30 pts</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:16px;"><span style="color:#94A3B8;">Total Calls (all-time)</span><span style="font-weight:600;">up to 20 pts</span></div>
+                  <div style="display:flex;justify-content:space-between;gap:16px;"><span style="color:#94A3B8;">Monthly Consistency</span><span style="font-weight:600;">up to 10 pts</span></div>
+                  <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);color:#94A3B8;font-size:11px;">S ≥80 · A ≥60 · B ≥40 · C &lt;40</div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="card-body">
@@ -1617,10 +1692,10 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--brand); ou
             <!-- Score ring -->
             <div class="perf-score-wrap" id="perf-score-wrap">
               <div class="perf-score-ring">
-                <svg width="80" height="80" viewBox="0 0 80 80">
-                  <circle cx="40" cy="40" r="34" fill="none" stroke="#E2E8F0" stroke-width="8"/>
-                  <circle id="perf-ring-arc" cx="40" cy="40" r="34" fill="none" stroke="#2563EB" stroke-width="8"
-                    stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"
+                <svg width="110" height="110" viewBox="0 0 110 110">
+                  <circle cx="55" cy="55" r="47" fill="none" stroke="#E2E8F0" stroke-width="9"/>
+                  <circle id="perf-ring-arc" cx="55" cy="55" r="47" fill="none" stroke="#2563EB" stroke-width="9"
+                    stroke-linecap="round" stroke-dasharray="295.3" stroke-dashoffset="295.3"
                     style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s ease;"/>
                 </svg>
                 <div class="perf-score-text">
@@ -1748,12 +1823,34 @@ function setSection(s){
 
 function changeMonth(dir){
   const idx=MONTHS.indexOf(currentMonth);
+  // Block navigation into the future
+  if(dir===1){
+    const nowY=parseInt(_now.getFullYear()), nowM=_now.getMonth();
+    const nextIdx=(idx+1)%12;
+    const nextYear=idx===11?parseInt(currentYear)+1:parseInt(currentYear);
+    if(nextYear>nowY||(nextYear===nowY&&nextIdx>nowM)) return;
+  }
   const newIdx=(idx+dir+12)%12;
   if(dir===1 && idx===11) currentYear=String(parseInt(currentYear)+1);
   if(dir===-1 && idx===0) currentYear=String(parseInt(currentYear)-1);
   currentMonth=MONTHS[newIdx];
   document.getElementById('filter-month').textContent=currentMonth+' '+currentYear;
+  // Update forward-nav button appearance
+  updateMonthNavBtn();
   renderAll();
+}
+
+function updateMonthNavBtn(){
+  const btn=document.querySelector('.filter-nav[onclick="changeMonth(1)"]');
+  if(!btn) return;
+  const idx=MONTHS.indexOf(currentMonth);
+  const nextIdx=(idx+1)%12;
+  const nextYear=idx===11?parseInt(currentYear)+1:parseInt(currentYear);
+  const nowY=_now.getFullYear(), nowM=_now.getMonth();
+  const atMax=nextYear>nowY||(nextYear===nowY&&nextIdx>nowM);
+  btn.style.opacity=atMax?'0.3':'';
+  btn.style.cursor=atMax?'not-allowed':'';
+  btn.title=atMax?'Cannot navigate to a future month':'';
 }
 
 async function loadData(){
@@ -1780,14 +1877,8 @@ async function loadData(){
     const now=new Date();
     _firstLoad=false;
     document.getElementById('info-latest').textContent=now.toLocaleDateString();
-    document.getElementById('info-synced').textContent='Just now';
-    let countdown=59;
+    document.getElementById('info-synced').textContent=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     clearInterval(window._countdownTimer);
-    window._countdownTimer=setInterval(()=>{
-      countdown--;
-      if(countdown<=0){clearInterval(window._countdownTimer);return;}
-      document.getElementById('info-synced').textContent=`${countdown}s ago`;
-    },1000);
     renderAll();
   }catch(e){
     document.getElementById('error-area').innerHTML=`<div class="error-msg">⚠️ Could not load data: ${e.message}</div>`;
@@ -1803,6 +1894,9 @@ function filteredData(){
   const ag=document.getElementById('filter-agent').value;
   if(ag!=='all') d=d.filter(r=>r.name===ag);
   if(currentView==='alltime') d=aggregateByAgent(d);
+  // Leaderboard search
+  const q=(document.getElementById('lb-search')?.value||'').trim().toLowerCase();
+  if(q) d=d.filter(r=>r.name.toLowerCase().includes(q));
   return d;
 }
 
@@ -1840,6 +1934,23 @@ function aggregateByAgent(data){
   });
 }
 
+function animateNum(id, target, isFloat=false, suffix=''){
+  const el=document.getElementById(id); if(!el) return;
+  const start=parseFloat(el.dataset.animVal||'0')||0;
+  el.dataset.animVal=target;
+  const dur=600, steps=30, interval=dur/steps;
+  let step=0;
+  clearInterval(el._animTimer);
+  el._animTimer=setInterval(()=>{
+    step++;
+    const t=step/steps;
+    const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; // easeInOutQuad
+    const val=start+(target-start)*ease;
+    el.textContent=(isFloat?val.toFixed(2):Math.round(val)).toLocaleString()+suffix;
+    if(step>=steps){clearInterval(el._animTimer);el.textContent=(isFloat?target.toFixed(2):Math.round(target)).toLocaleString()+suffix;}
+  },interval);
+}
+
 function renderAll(){
   const data=filteredData();
   const period=currentView==='monthly'?`${currentMonth} ${currentYear}`:'All Time';
@@ -1852,26 +1963,26 @@ function renderAll(){
   const totAdmitChats=data.reduce((s,r)=>s+r.admitChats,0);
   const totAdmits=data.reduce((s,r)=>s+r.totalAdmits,0);
 
-  document.getElementById('s-calls').textContent=totCalls.toLocaleString();
-  document.getElementById('s-outbound').textContent=totOutbound.toLocaleString();
-  document.getElementById('s-calls-vob').textContent=totCallsVOB.toLocaleString();
-  document.getElementById('s-chats-vob').textContent=totChatsVOB.toLocaleString();
-  document.getElementById('s-vobs').textContent=totVOB.toLocaleString();
-  document.getElementById('s-admits-calls').textContent=totAdmitCalls;
-  document.getElementById('s-admits-chats').textContent=totAdmitChats;
-  document.getElementById('s-admits-total').textContent=totAdmits;
+  animateNum('s-calls', totCalls);
+  animateNum('s-outbound', totOutbound);
+  animateNum('s-calls-vob', totCallsVOB);
+  animateNum('s-chats-vob', totChatsVOB);
+  animateNum('s-vobs', totVOB);
+  animateNum('s-admits-calls', totAdmitCalls);
+  animateNum('s-admits-chats', totAdmitChats);
+  animateNum('s-admits-total', totAdmits);
 
   renderCardTrends(totCalls,totOutbound,totCallsVOB,totChatsVOB,totVOB,totAdmitCalls,totAdmitChats,totAdmits);
 
   const byCallsVOB=[...data].sort((a,b)=>b.callsVOB-a.callsVOB)[0];
   const byChatsVOB=[...data].sort((a,b)=>b.chatsVOB-a.chatsVOB)[0];
-  const byAdmits=[...data].sort((a,b)=>b.totalAdmits-a.totalAdmits)[0];
+  const byAdmits=[...data].sort((a,b)=>(b.totalAdmits-a.totalAdmits)||( b.vobPct-a.vobPct))[0];
   set('top-calls-vob-name',byCallsVOB?.name||'—');
   set('top-calls-vob-sub',byCallsVOB?`${byCallsVOB.callsVOB} Calls VOB`:'');
   set('top-chats-vob-name',byChatsVOB?.name||'—');
   set('top-chats-vob-sub',byChatsVOB?`${byChatsVOB.chatsVOB} Chats VOB`:'');
   set('top-admit-name',byAdmits?.name||'—');
-  set('top-admit-sub',byAdmits?`${byAdmits.totalAdmits} Total Admits`:'');
+  set('top-admit-sub',byAdmits?`${byAdmits.totalAdmits} admits · ${byAdmits.vobPct.toFixed(2)}% VOB`:'');
   set('admits-chart-title',`Admits by Agent — ${period}`);
   set('vob-chart-title',`VOB Rate by Agent — ${period}`);
   set('lb-period',period);
@@ -2131,7 +2242,15 @@ function renderTable(data){
     {key:'admitChats',label:'Admits (CH)',render:r=>r.admitChats||''},
     {key:'totalAdmits',label:'Total Admits',render:r=>r.totalAdmits?`<span class="admit-badge">${r.totalAdmits}</span>`:''},
   ];
-  if(!sorted.length){document.getElementById('table-wrap').innerHTML='<div style="padding:20px;color:#94a3b8;font-size:13px;font-weight:500;">No data for this period.</div>';return;}
+  if(!sorted.length){
+    const periodLabel=currentView==='monthly'?`${currentMonth} ${currentYear}`:'this period';
+    document.getElementById('table-wrap').innerHTML=`<div style="padding:40px 20px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">📭</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text-2);margin-bottom:6px;">No data for ${periodLabel}</div>
+      <div style="font-size:13px;color:var(--text-4);font-weight:500;">No agent records have been recorded for this period yet. Try selecting a different month or switching to All Time view.</div>
+    </div>`;
+    return;
+  }
   const gt={
     totalCalls:sorted.reduce((s,r)=>s+r.totalCalls,0),outbound:sorted.reduce((s,r)=>s+r.outbound,0),
     transfers:sorted.reduce((s,r)=>s+r.transfers,0),callsVOB:sorted.reduce((s,r)=>s+r.callsVOB,0),
@@ -2366,7 +2485,7 @@ function renderPerfTracker(agentName,agentRows,cur){
   const monthsWithAdmit=agentRows.filter(r=>r.totalAdmits>0).length;
   const consScore=months>0?Math.min(10,(monthsWithAdmit/months)*10):0;
   const score=Math.round(admitScore+vobScore+callScore+consScore);
-  const circumference=213.6;
+  const circumference=295.3;
   const offset=circumference-(score/100)*circumference;
   const arc=document.getElementById('perf-ring-arc');
   if(arc){arc.style.strokeDashoffset=offset;arc.style.stroke=score>=80?'#10b981':score>=60?'#3b82f6':score>=40?'#f59e0b':'#ef4444';}
@@ -2445,7 +2564,7 @@ function buildAgentBarChart(rows){
     svg.innerHTML='<text x="300" y="130" text-anchor="middle" fill="#94a3b8" font-size="12">No data available for this agent</text>';
     return;
   }
-  const H=260,padL=46,padR=16,padT=16,padB=34;
+  const H=280,padL=46,padR=56,padT=16,padB=34;
   const W=Math.max(560,rows.length*68+padL+padR);
   const plotW=W-padL-padR, plotH=H-padT-padB;
   const maxVal=Math.max(...rows.map(r=>r.totalCalls),1);
@@ -2453,7 +2572,7 @@ function buildAgentBarChart(rows){
   const groupW=plotW/rows.length;
   const series=[{key:'totalCalls',color:'#3b82f6'},{key:'callsVOB',color:'#a855f7'},{key:'chatsVOB',color:'#f97316'},{key:'totalAdmits',color:'#10b981'}];
   const barW=Math.min(13,(groupW-6)/series.length);
-  let grid='',bars='',labels='';
+  let grid='',bars='',labels='',vobLine='',vobDots='';
   for(let i=0;i<=4;i++){
     const v=niceMax*i/4; const y=padT+plotH-(v/niceMax)*plotH;
     grid+=`<line x1="${padL}" x2="${W-padR}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#E2E8F0" stroke-dasharray="3,3"/>`;
@@ -2470,9 +2589,30 @@ function buildAgentBarChart(rows){
     });
     labels+=`<text x="${(gx+groupW/2).toFixed(1)}" y="${H-10}" text-anchor="middle" font-size="10" fill="#64748b">${r.monthName.slice(0,3)} ${r.yearNum}</text>`;
   });
-  const axes=`<line x1="${padL}" x2="${padL}" y1="${padT}" y2="${padT+plotH}" stroke="#CBD5E1"/><line x1="${padL}" x2="${W-padR}" y1="${padT+plotH}" y2="${padT+plotH}" stroke="#CBD5E1"/>`;
+  // VOB% right axis trendline
+  const maxVOB=Math.max(...rows.map(r=>r.vobPct),4);
+  const niceVOB=niceCeil(maxVOB);
+  const vobPts=rows.map((r,i)=>{
+    const cx=padL+(i+0.5)*groupW;
+    const cy=padT+plotH-(r.vobPct/niceVOB)*plotH;
+    return{cx,cy,vob:r.vobPct};
+  });
+  if(vobPts.length>1){
+    vobLine+=`<polyline points="${vobPts.map(p=>`${p.cx.toFixed(1)},${p.cy.toFixed(1)}`).join(' ')}" fill="none" stroke="#f43f5e" stroke-width="2" stroke-dasharray="5,3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }
+  vobPts.forEach(p=>{
+    vobDots+=`<circle cx="${p.cx.toFixed(1)}" cy="${p.cy.toFixed(1)}" r="4" fill="#f43f5e" stroke="#fff" stroke-width="1.5"><title>VOB Rate: ${p.vob.toFixed(2)}%</title></circle>`;
+  });
+  // Right-axis labels for VOB%
+  let rightAxis='';
+  for(let i=0;i<=4;i++){
+    const v=niceVOB*i/4;
+    const y=padT+plotH-(v/niceVOB)*plotH;
+    rightAxis+=`<text x="${(W-padR+10).toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="start" font-size="10" fill="#f43f5e">${v.toFixed(1)}%</text>`;
+  }
+  const axes=`<line x1="${padL}" x2="${padL}" y1="${padT}" y2="${padT+plotH}" stroke="#CBD5E1"/><line x1="${padL}" x2="${W-padR}" y1="${padT+plotH}" y2="${padT+plotH}" stroke="#CBD5E1"/><line x1="${W-padR}" x2="${W-padR}" y1="${padT}" y2="${padT+plotH}" stroke="#FDA4AF" stroke-dasharray="3,3"/>`;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.setAttribute('width',W); svg.setAttribute('height',H);
-  svg.innerHTML=grid+axes+bars+labels;
+  svg.innerHTML=grid+axes+rightAxis+bars+vobLine+vobDots+labels;
 }
 
 function renderAgentTable(rows){
@@ -2505,6 +2645,15 @@ function sort(col){
 
 loadData();
 setInterval(loadData,60000);
+
+// Close score tooltip when clicking outside
+document.addEventListener('click',function(e){
+  const box=document.getElementById('score-tooltip-box');
+  if(box&&!e.target.closest('.score-info-wrap')) box.classList.remove('score-tip-visible');
+});
+
+// Init month nav button state on load
+document.addEventListener('DOMContentLoaded',function(){ updateMonthNavBtn(); });
 
 /* ── THEME SYSTEM ── */
 (function initTheme(){
