@@ -884,6 +884,32 @@ select.filter-select {
 .donut-seg {
   stroke: var(--surface);
   stroke-width: 1.5;
+  transform-origin: 90px 90px;
+  animation: donutSegIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.donut-center-val,
+.donut-center-label {
+  animation: donutFadeIn 0.5s ease-out 0.25s backwards;
+}
+
+.donut-legend-item {
+  animation: donutLegendIn 0.4s ease-out backwards;
+}
+
+@keyframes donutSegIn {
+  from { opacity: 0; transform: scale(0.8) rotate(-6deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes donutFadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes donutLegendIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 /* ── LEGEND SCROLLBAR ── */
@@ -2240,6 +2266,8 @@ function renderInsights(){
 
 function set(id,txt){const el=document.getElementById(id);if(el)el.textContent=txt;}
 
+const DONUT_COLORS=['var(--brand)','var(--emerald)','var(--amber)','var(--rose)','var(--purple)','var(--cyan)','var(--pink)','var(--teal)','var(--orange)','var(--indigo)'];
+
 function buildDonut(svgId,legendId,items,centerVal,centerLabel){
   const svg=document.getElementById(svgId);
   const legend=document.getElementById(legendId);
@@ -2249,15 +2277,17 @@ function buildDonut(svgId,legendId,items,centerVal,centerLabel){
   }
   const cx=90,cy=90,r=70,ir=44;
   const total=items.reduce((s,i)=>s+i.val,0);
-  let angle=-Math.PI/2,paths='';
+  let angle=-Math.PI/2,paths='',segIdx=0;
   items.forEach((item,idx)=>{
     const slice=(item.val/total)*2*Math.PI;
     if(slice<0.001){angle+=slice;return;}
-    const color=COLORS[idx%COLORS.length];
+    const color=DONUT_COLORS[idx%DONUT_COLORS.length];
+    const delay=(segIdx*0.05).toFixed(2)+'s';
+    segIdx++;
     // Special case: single item fills the full circle — SVG arcs can't draw a
     // full 360° arc when start===end, so use circle elements instead.
     if(Math.abs(slice-2*Math.PI)<0.0001){
-      paths+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`;
+      paths+=`<circle class="donut-seg" cx="${cx}" cy="${cy}" r="${r}" fill="${color}" style="animation-delay:${delay}"/>`;
       paths+=`<circle cx="${cx}" cy="${cy}" r="${ir}" fill="var(--surface)"/>`;
       angle+=slice;return;
     }
@@ -2266,14 +2296,14 @@ function buildDonut(svgId,legendId,items,centerVal,centerLabel){
     const xi1=cx+ir*Math.cos(angle),yi1=cy+ir*Math.sin(angle);
     const xi2=cx+ir*Math.cos(angle+slice),yi2=cy+ir*Math.sin(angle+slice);
     const large=slice>Math.PI?1:0;
-    paths+=`<path class="donut-seg" d="M${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${xi2.toFixed(2)},${yi2.toFixed(2)} A${ir},${ir} 0 ${large},0 ${xi1.toFixed(2)},${yi1.toFixed(2)} Z" fill="${color}"/>`;
+    paths+=`<path class="donut-seg" style="animation-delay:${delay}" d="M${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${xi2.toFixed(2)},${yi2.toFixed(2)} A${ir},${ir} 0 ${large},0 ${xi1.toFixed(2)},${yi1.toFixed(2)} Z" fill="${color}"/>`;
     angle+=slice;
   });
   svg.innerHTML=paths+
     `<text x="90" y="87" text-anchor="middle" class="donut-center-val" font-size="21" font-weight="700">${centerVal}</text>`+
-    `<text x="90" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">${centerLabel}</text>`;
+    `<text x="90" y="102" text-anchor="middle" class="donut-center-label" fill="#94a3b8" font-size="10">${centerLabel}</text>`;
   legend.innerHTML=items.map((item,i)=>
-    `<div class="legend-item"><div class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></div><span class="legend-name">${item.name}</span><span class="legend-val">${item.display}</span></div>`
+    `<div class="legend-item donut-legend-item" style="animation-delay:${(i*0.04).toFixed(2)}s"><div class="legend-dot" style="background:${DONUT_COLORS[i%DONUT_COLORS.length]}"></div><span class="legend-name">${item.name}</span><span class="legend-val">${item.display}</span></div>`
   ).join('');
 }
 
