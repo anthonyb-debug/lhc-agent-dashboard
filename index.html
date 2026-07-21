@@ -885,11 +885,13 @@ select.filter-select {
   stroke: var(--surface);
   stroke-width: 1.5;
   transform-origin: 90px 90px;
+}
+
+.donut-seg-anim {
   animation: donutSegIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
-.donut-center-val,
-.donut-center-label {
+.donut-center-anim {
   animation: donutFadeIn 0.5s ease-out 0.25s backwards;
 }
 
@@ -1951,7 +1953,7 @@ function updateMonthNavBtn(){
   btn.title=atMax?'Cannot navigate to a future month':'';
 }
 
-async function loadData(){
+async function loadData(silent=false){
   if(_firstLoad){
     document.getElementById('table-wrap').innerHTML='<div class="loading"><div class="spinner"></div> Fetching from Google Sheets…</div>';
   }
@@ -1977,7 +1979,7 @@ async function loadData(){
     document.getElementById('info-latest').textContent=now.toLocaleDateString();
     document.getElementById('info-synced').textContent=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     clearInterval(window._countdownTimer);
-    renderAll();
+    renderAll(!silent);
   }catch(e){
     document.getElementById('error-area').innerHTML=`<div class="error-msg">⚠️ Could not load data: ${e.message}</div>`;
     document.getElementById('table-wrap').innerHTML='';
@@ -2049,7 +2051,7 @@ function animateNum(id, target, isFloat=false, suffix=''){
   },interval);
 }
 
-function renderAll(){
+function renderAll(animate=true){
   const data=filteredData();
   const period=currentView==='monthly'?`${currentMonth} ${currentYear}`:'All Time';
   const totCalls=data.reduce((s,r)=>s+r.totalCalls,0);
@@ -2089,8 +2091,8 @@ function renderAll(){
   renderGoalTracker(totAdmits);
   renderTrendLineChart();
   renderInsights();
-  renderDonutAdmits(data,totAdmits);
-  renderDonutVOB(data);
+  renderDonutAdmits(data,totAdmits,animate);
+  renderDonutVOB(data,animate);
   renderTable(data);
 
   if(currentSection==='agent') renderAgentSection();
@@ -2268,7 +2270,7 @@ function set(id,txt){const el=document.getElementById(id);if(el)el.textContent=t
 
 const DONUT_COLORS=['var(--brand)','var(--emerald)','var(--amber)','var(--rose)','var(--purple)','var(--cyan)','var(--pink)','var(--teal)','var(--orange)','var(--indigo)'];
 
-function buildDonut(svgId,legendId,items,centerVal,centerLabel){
+function buildDonut(svgId,legendId,items,centerVal,centerLabel,animate=true){
   const svg=document.getElementById(svgId);
   const legend=document.getElementById(legendId);
   if(!items.length){
@@ -2277,17 +2279,21 @@ function buildDonut(svgId,legendId,items,centerVal,centerLabel){
   }
   const cx=90,cy=90,r=70,ir=44;
   const total=items.reduce((s,i)=>s+i.val,0);
+  const segClass=animate?'donut-seg donut-seg-anim':'donut-seg';
+  const centerValClass=animate?'donut-center-val donut-center-anim':'donut-center-val';
+  const centerLabelClass=animate?'donut-center-label donut-center-anim':'donut-center-label';
+  const legendItemClass=animate?'legend-item donut-legend-item':'legend-item';
   let angle=-Math.PI/2,paths='',segIdx=0;
   items.forEach((item,idx)=>{
     const slice=(item.val/total)*2*Math.PI;
     if(slice<0.001){angle+=slice;return;}
     const color=DONUT_COLORS[idx%DONUT_COLORS.length];
-    const delay=(segIdx*0.05).toFixed(2)+'s';
+    const delayStyle=animate?` style="animation-delay:${(segIdx*0.05).toFixed(2)}s"`:'';
     segIdx++;
     // Special case: single item fills the full circle — SVG arcs can't draw a
     // full 360° arc when start===end, so use circle elements instead.
     if(Math.abs(slice-2*Math.PI)<0.0001){
-      paths+=`<circle class="donut-seg" cx="${cx}" cy="${cy}" r="${r}" fill="${color}" style="animation-delay:${delay}"/>`;
+      paths+=`<circle class="${segClass}" cx="${cx}" cy="${cy}" r="${r}" fill="${color}"${delayStyle}/>`;
       paths+=`<circle cx="${cx}" cy="${cy}" r="${ir}" fill="var(--surface)"/>`;
       angle+=slice;return;
     }
@@ -2296,28 +2302,29 @@ function buildDonut(svgId,legendId,items,centerVal,centerLabel){
     const xi1=cx+ir*Math.cos(angle),yi1=cy+ir*Math.sin(angle);
     const xi2=cx+ir*Math.cos(angle+slice),yi2=cy+ir*Math.sin(angle+slice);
     const large=slice>Math.PI?1:0;
-    paths+=`<path class="donut-seg" style="animation-delay:${delay}" d="M${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${xi2.toFixed(2)},${yi2.toFixed(2)} A${ir},${ir} 0 ${large},0 ${xi1.toFixed(2)},${yi1.toFixed(2)} Z" fill="${color}"/>`;
+    paths+=`<path class="${segClass}"${delayStyle} d="M${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${xi2.toFixed(2)},${yi2.toFixed(2)} A${ir},${ir} 0 ${large},0 ${xi1.toFixed(2)},${yi1.toFixed(2)} Z" fill="${color}"/>`;
     angle+=slice;
   });
   svg.innerHTML=paths+
-    `<text x="90" y="87" text-anchor="middle" class="donut-center-val" font-size="21" font-weight="700">${centerVal}</text>`+
-    `<text x="90" y="102" text-anchor="middle" class="donut-center-label" fill="#94a3b8" font-size="10">${centerLabel}</text>`;
-  legend.innerHTML=items.map((item,i)=>
-    `<div class="legend-item donut-legend-item" style="animation-delay:${(i*0.04).toFixed(2)}s"><div class="legend-dot" style="background:${DONUT_COLORS[i%DONUT_COLORS.length]}"></div><span class="legend-name">${item.name}</span><span class="legend-val">${item.display}</span></div>`
-  ).join('');
+    `<text x="90" y="87" text-anchor="middle" class="${centerValClass}" font-size="21" font-weight="700">${centerVal}</text>`+
+    `<text x="90" y="102" text-anchor="middle" class="${centerLabelClass}" fill="#94a3b8" font-size="10">${centerLabel}</text>`;
+  legend.innerHTML=items.map((item,i)=>{
+    const delayStyle=animate?` style="animation-delay:${(i*0.04).toFixed(2)}s"`:'';
+    return `<div class="${legendItemClass}"${delayStyle}><div class="legend-dot" style="background:${DONUT_COLORS[i%DONUT_COLORS.length]}"></div><span class="legend-name">${item.name}</span><span class="legend-val">${item.display}</span></div>`;
+  }).join('');
 }
 
-function renderDonutAdmits(data,total){
+function renderDonutAdmits(data,total,animate=true){
   const items=data.filter(d=>d.totalAdmits>0).sort((a,b)=>b.totalAdmits-a.totalAdmits).map(d=>({name:d.name,val:d.totalAdmits,display:d.totalAdmits}));
-  buildDonut('donut-admits','legend-admits',items,total,'Total Admits');
+  buildDonut('donut-admits','legend-admits',items,total,'Total Admits',animate);
 }
 
-function renderDonutVOB(data){
+function renderDonutVOB(data,animate=true){
   const items=data.filter(d=>d.vobPct>0).sort((a,b)=>b.vobPct-a.vobPct).map(d=>({name:d.name,val:d.vobPct,display:d.vobPct.toFixed(1)+'%'}));
   const totVOBs=data.reduce((s,d)=>s+d.callsVOB,0);
   const totCalls=data.reduce((s,d)=>s+d.totalCalls,0);
   const teamVOB=totCalls>0?((totVOBs/totCalls)*100).toFixed(2)+'%':'—';
-  buildDonut('donut-vob','legend-vob',items,teamVOB,'Team VOB Rate');
+  buildDonut('donut-vob','legend-vob',items,teamVOB,'Team VOB Rate',animate);
 }
 
 function renderTable(data){
@@ -2746,7 +2753,7 @@ function sort(col){
 }
 
 loadData();
-setInterval(loadData,60000);
+setInterval(function(){ loadData(true); },60000);
 
 // Close score tooltip when clicking outside
 document.addEventListener('click',function(e){
