@@ -395,6 +395,119 @@ body {
 .btn-refresh:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 .btn-refresh:active { transform: scale(0.97); }
 
+/* ── EXPORT CSV MODAL ── */
+.export-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.55);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.export-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 380px;
+  overflow: hidden;
+}
+
+.export-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.export-modal-header h3 {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.export-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  border-radius: 6px;
+}
+
+.export-modal-close:hover { background: var(--surface2); color: var(--text-1); }
+
+.export-modal-body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.export-field { display: flex; flex-direction: column; gap: 6px; }
+
+.export-field label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.export-select {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text-1);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+.export-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.export-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.export-btn:hover { border-color: var(--border2); color: var(--text-1); }
+
+.export-btn-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.export-btn-primary:hover { background: var(--brand); opacity: 0.9; color: #fff; }
+
 /* ── FILTERS BAR ── */
 .filters-bar {
   background: var(--surface);
@@ -1426,8 +1539,40 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--brand); ou
         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         Refresh
       </button>
+      <button class="btn-refresh" onclick="openExportModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
     </div>
   </header>
+
+  <!-- EXPORT CSV MODAL -->
+  <div id="export-modal-overlay" class="export-modal-overlay" style="display:none;" onclick="if(event.target===this) closeExportModal()">
+    <div class="export-modal">
+      <div class="export-modal-header">
+        <h3>Export CSV</h3>
+        <button class="export-modal-close" onclick="closeExportModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="export-modal-body">
+        <div class="export-field">
+          <label for="export-month">Month</label>
+          <select id="export-month" class="filter-select export-select">
+            <option value="all">All months</option>
+          </select>
+        </div>
+        <div class="export-field">
+          <label for="export-agent">Agent</label>
+          <select id="export-agent" class="filter-select export-select">
+            <option value="all">All agents</option>
+          </select>
+        </div>
+      </div>
+      <div class="export-modal-footer">
+        <button class="export-btn" onclick="closeExportModal()">Cancel</button>
+        <button class="export-btn export-btn-primary" onclick="doExportCSV()">Export</button>
+      </div>
+    </div>
+  </div>
 
   <!-- FILTERS -->
   <div class="filters-bar" role="toolbar" aria-label="Filters">
@@ -1973,7 +2118,9 @@ async function loadData(silent=false){
     }));
     const agents=[...new Set(allData.map(d=>d.name))].sort();
     const sel=document.getElementById('filter-agent');
+    const prevSelected=sel.value;
     sel.innerHTML='<option value="all">All agents</option>'+agents.map(a=>`<option value="${a}">${a}</option>`).join('');
+    sel.value=agents.includes(prevSelected)?prevSelected:'all';
     const now=new Date();
     _firstLoad=false;
     document.getElementById('info-latest').textContent=now.toLocaleDateString();
@@ -1998,6 +2145,103 @@ function filteredData(){
   const q=(document.getElementById('lb-search')?.value||'').trim().toLowerCase();
   if(q) d=d.filter(r=>r.name.toLowerCase().includes(q));
   return d;
+}
+
+// ── EXPORT CSV ──
+function openExportModal(){
+  const monthSel=document.getElementById('export-month');
+  const agentSel=document.getElementById('export-agent');
+
+  // Build unique month/year list in chronological order
+  const seen=new Set();
+  const monthEntries=[];
+  allData.forEach(d=>{
+    const p=d.month.trim().split(' ');
+    const mName=p[0]||'', yr=parseInt(p[1])||0;
+    const key=mName+' '+yr;
+    if(mName && yr && !seen.has(key)){
+      seen.add(key);
+      monthEntries.push({label:key, mName, yr, monthIdx:MONTHS.indexOf(mName)});
+    }
+  });
+  monthEntries.sort((a,b)=>(a.yr-b.yr)||(a.monthIdx-b.monthIdx));
+  monthSel.innerHTML='<option value="all">All months</option>'+
+    monthEntries.map(m=>`<option value="${m.label}">${m.label}</option>`).join('');
+  // Default to the currently viewed month if present, else "all"
+  const curKey=currentMonth+' '+currentYear;
+  monthSel.value=seen.has(curKey)?curKey:'all';
+
+  // Build agent list
+  const agents=[...new Set(allData.map(d=>d.name))].sort();
+  agentSel.innerHTML='<option value="all">All agents</option>'+
+    agents.map(a=>`<option value="${a}">${a}</option>`).join('');
+  const curAgent=document.getElementById('filter-agent')?.value;
+  agentSel.value=(curAgent && curAgent!=='all' && agents.includes(curAgent))?curAgent:'all';
+
+  document.getElementById('export-modal-overlay').style.display='flex';
+}
+
+function closeExportModal(){
+  document.getElementById('export-modal-overlay').style.display='none';
+}
+
+function csvEscape(val){
+  const s=String(val==null?'':val);
+  if(/[",\n]/.test(s)) return '"'+s.replace(/"/g,'""')+'"';
+  return s;
+}
+
+function doExportCSV(){
+  const monthChoice=document.getElementById('export-month').value;
+  const agentChoice=document.getElementById('export-agent').value;
+
+  let rows=allData.slice();
+  if(monthChoice!=='all') rows=rows.filter(r=>r.month.trim()===monthChoice);
+  if(agentChoice!=='all') rows=rows.filter(r=>r.name===agentChoice);
+
+  rows=rows.map(r=>{
+    const p=r.month.trim().split(' ');
+    return {...r, monthName:p[0]||'', yearNum:parseInt(p[1])||0, monthIdx:MONTHS.indexOf(p[0])};
+  }).sort((a,b)=>(a.yearNum-b.yearNum)||(a.monthIdx-b.monthIdx)||a.name.localeCompare(b.name));
+
+  const header=['Year','Month','Agent','Calls','Outbound','Transfers','AHT','Calls VOB','Chats VOB','VOB %','Admit from Calls','Admit from Chats','Total Admits'];
+  const lines=[header.map(csvEscape).join(',')];
+
+  rows.forEach(r=>{
+    lines.push([
+      r.yearNum || '',
+      r.monthName || '',
+      r.name,
+      r.totalCalls,
+      r.outbound,
+      r.transfers,
+      r.aht,
+      r.callsVOB,
+      r.chatsVOB,
+      r.vobPct.toFixed(2)+'%',
+      r.admitCalls,
+      r.admitChats,
+      r.totalAdmits
+    ].map(csvEscape).join(','));
+  });
+
+  if(rows.length===0){
+    lines.push('No data found for the selected month/agent.');
+  }
+
+  const csvContent='\uFEFF'+lines.join('\r\n');
+  const blob=new Blob([csvContent],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const monthPart=monthChoice==='all'?'AllMonths':monthChoice.replace(' ','_');
+  const agentPart=agentChoice==='all'?'AllAgents':agentChoice.replace(/\s+/g,'_');
+  a.href=url;
+  a.download=`Agent_Stats_${monthPart}_${agentPart}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  closeExportModal();
 }
 
 function ahtToSeconds(aht){
@@ -2346,7 +2590,7 @@ function renderTable(data){
     {key:'aht',label:'AHT',render:r=>r.aht},
     {key:'callsVOB',label:'Calls VOB',render:r=>r.callsVOB},
     {key:'chatsVOB',label:'Chats VOB',render:r=>r.chatsVOB},
-    {key:'vobPct',label:'VOB Rate',render:r=>`<span class="vob-pct ${r.vobPct>=4?'vob-high':r.vobPct>=2?'vob-mid':'vob-low'}">${r.vobPct.toFixed(2)}%</span>`},
+    {key:'vobPct',label:'VOB Rate',render:r=>`<span class="vob-pct ${r.vobPct>=4?'vob-high':r.vobPct>=3.5?'vob-mid':'vob-low'}">${r.vobPct.toFixed(2)}%</span>`},
     {key:'admitCalls',label:'Admits (C)',render:r=>r.admitCalls||''},
     {key:'admitChats',label:'Admits (CH)',render:r=>r.admitChats||''},
     {key:'totalAdmits',label:'Total Admits',render:r=>r.totalAdmits?`<span class="admit-badge">${r.totalAdmits}</span>`:''},
@@ -2372,7 +2616,7 @@ function renderTable(data){
     <td>${gt.totalCalls.toLocaleString()}</td><td>${gt.outbound.toLocaleString()}</td>
     <td>${gt.transfers.toLocaleString()}</td><td>—</td>
     <td>${gt.callsVOB}</td><td>${gt.chatsVOB}</td>
-    <td><span class="vob-pct ${gt.vobPct>=4?'vob-high':gt.vobPct>=2?'vob-mid':'vob-low'}">${gt.vobPct.toFixed(2)}%</span></td>
+    <td><span class="vob-pct ${gt.vobPct>=4?'vob-high':gt.vobPct>=3.5?'vob-mid':'vob-low'}">${gt.vobPct.toFixed(2)}%</span></td>
     <td>${gt.admitCalls}</td><td>${gt.admitChats}</td>
     <td><span class="grand-total-admits">${gt.totalAdmits}</span></td>
   </tr>`;
@@ -2396,7 +2640,7 @@ function renderTable(data){
     const r=sorted[i]; if(!r) return;
     const nameCell=tr.querySelector('.agent-name'); if(!nameCell) return;
     const rankLabel=i===0?'🥇 1st':i===1?'🥈 2nd':i===2?'🥉 3rd':`#${i+1}`;
-    const vobCls=r.vobPct>=4?'#059669':r.vobPct>=2?'#D97706':'#DC2626';
+    const vobCls=r.vobPct>=4?'#059669':r.vobPct>=3.5?'#D97706':'#DC2626';
     nameCell.addEventListener('mouseenter',()=>{
       tooltip.innerHTML=`
         <div class="lb-tooltip-name">${r.name}</div>
@@ -2445,7 +2689,7 @@ function renderAgentOverview(){
     const color=COLORS[i%COLORS.length];
     const medal=i<3?MEDAL[i]:`<span style="font-size:11px;font-weight:700;color:var(--text-4);">#${i+1}</span>`;
     const admitBar=Math.round((a.totalAdmits/maxAdmits)*100);
-    const vobStatus=a.vobPct>=4?'#059669':a.vobPct>=2?'#D97706':'#DC2626';
+    const vobStatus=a.vobPct>=4?'#059669':a.vobPct>=3.5?'#D97706':'#DC2626';
     const initials=a.name.split(' ').map(n=>n[0]||'').join('').toUpperCase().slice(0,2);
     return `<div onclick="jumpToAgent('${a.name.replace(/'/g,"\\'")}')"
       style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden;border-left:3px solid ${color};"
@@ -2731,7 +2975,7 @@ function renderAgentTable(rows){
     <tbody>${[...rows].reverse().map(r=>`<tr>
       <td>${r.monthName} ${r.yearNum}</td><td>${r.totalCalls.toLocaleString()}</td><td>${r.outbound.toLocaleString()}</td>
       <td>${r.callsVOB}</td><td>${r.chatsVOB}</td>
-      <td><span class="vob-pct ${r.vobPct>=4?'vob-high':r.vobPct>=2?'vob-mid':'vob-low'}">${r.vobPct.toFixed(2)}%</span></td>
+      <td><span class="vob-pct ${r.vobPct>=4?'vob-high':r.vobPct>=3.5?'vob-mid':'vob-low'}">${r.vobPct.toFixed(2)}%</span></td>
       <td>${r.admitCalls||''}</td><td>${r.admitChats||''}</td>
       <td>${r.totalAdmits?`<span class="admit-badge">${r.totalAdmits}</span>`:''}</td>
     </tr>`).join('')}</tbody>
