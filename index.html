@@ -3325,9 +3325,9 @@ function renderPerfTracker(agentName,agentRows,cur){
   const kpiCallsCls=totCalls>=500?'kpi-good':totCalls>=200?'':'kpi-warn';
   document.querySelectorAll('#perf-kpi-grid .perf-kpi').forEach((el,i)=>{
     el.className='perf-kpi';
-    if(i===2) el.classList.add(kpiAdmitsCls);
-    if(i===3) el.classList.add(kpiVOBCls);
-    if(i===0) el.classList.add(kpiCallsCls);
+    if(i===2&&kpiAdmitsCls) el.classList.add(kpiAdmitsCls);
+    if(i===3&&kpiVOBCls) el.classList.add(kpiVOBCls);
+    if(i===0&&kpiCallsCls) el.classList.add(kpiCallsCls);
   });
   set('pk-calls',totCalls.toLocaleString()); set('pk-vob',totVOB.toLocaleString());
   set('pk-admits',totAdmits.toLocaleString()); set('pk-vobpct',avgVOBpct.toFixed(2)+'%');
