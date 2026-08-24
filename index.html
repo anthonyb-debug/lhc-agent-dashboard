@@ -2363,8 +2363,11 @@ function aggregateByAgent(data){
 const VOB_PASS_RATE=4.00;
 const QUARTER_LABELS=['Q1 (Jan–Mar)','Q2 (Apr–Jun)','Q3 (Jul–Sep)','Q4 (Oct–Dec)'];
 const QUARTER_SHORT=['Q1','Q2','Q3','Q4'];
-const WATCHLIST_EXCLUDED_AGENTS=new Set(['Robles, Alexander','Artazo, Rickter John','Sanchez, Rey John','Diesta, Pia','Dancel, MJ','Pineda, Tristan']);
+const WATCHLIST_EXCLUDED_AGENTS=new Set(['Robles, Alexander','Artazo, Rickter John','Sanchez, Rey John','Diesta, Pia','Dancel, MJ','Pineda, Tristan','Bernardo, Sean','Magbanua, Rubie']);
 function getWatchlistData(){ return allData.filter(r=>!WATCHLIST_EXCLUDED_AGENTS.has(r.name.trim())); }
+// Chat-only agents: no longer take calls. Call-specific leaderboard fields show N/A (display only; underlying values stay 0 so totals/team VOB Rate remain correct).
+const CHAT_ONLY_AGENTS=new Set(['Bernardo, Sean','Magbanua, Rubie']);
+function isChatOnly(r){ return CHAT_ONLY_AGENTS.has((r.name||'').trim()); }
 let wlMonthSortCol='vobPct', wlMonthSortDir=1;
 let wlQuarterSortCol='vobPct', wlQuarterSortDir=1;
 
@@ -3082,17 +3085,18 @@ function renderTable(data){
     }
     return (b[sortCol]-a[sortCol])*sortDir;
   });
+  const NA='<span style="color:var(--text-4);">N/A</span>';
   const cols=[
     {key:'#',label:'#',render:(r,i)=>`<span class="rank-num ${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}</span>`},
     {key:'name',label:'Agent',render:r=>`<span class="agent-name">${r.name}</span>`},
-    {key:'totalCalls',label:'Calls',render:r=>r.totalCalls.toLocaleString()},
-    {key:'outbound',label:'Outbound',render:r=>r.outbound.toLocaleString()},
-    {key:'transfers',label:'Transfers',render:r=>r.transfers},
-    {key:'aht',label:'AHT',render:r=>r.aht},
-    {key:'callsVOB',label:'Calls VOB',render:r=>r.callsVOB},
+    {key:'totalCalls',label:'Calls',render:r=>isChatOnly(r)?NA:r.totalCalls.toLocaleString()},
+    {key:'outbound',label:'Outbound',render:r=>isChatOnly(r)?NA:r.outbound.toLocaleString()},
+    {key:'transfers',label:'Transfers',render:r=>isChatOnly(r)?NA:r.transfers},
+    {key:'aht',label:'AHT',render:r=>isChatOnly(r)?NA:r.aht},
+    {key:'callsVOB',label:'Calls VOB',render:r=>isChatOnly(r)?NA:r.callsVOB},
     {key:'chatsVOB',label:'Chats VOB',render:r=>r.chatsVOB},
-    {key:'vobPct',label:'VOB Rate',render:r=>`<span class="vob-pct ${r.vobPct>=4?'vob-high':r.vobPct>=3.5?'vob-mid':'vob-low'}">${r.vobPct.toFixed(2)}%</span>`},
-    {key:'admitCalls',label:'Admits (C)',render:r=>r.admitCalls||''},
+    {key:'vobPct',label:'VOB Rate',render:r=>isChatOnly(r)?NA:`<span class="vob-pct ${r.vobPct>=4?'vob-high':r.vobPct>=3.5?'vob-mid':'vob-low'}">${r.vobPct.toFixed(2)}%</span>`},
+    {key:'admitCalls',label:'Admits (C)',render:r=>isChatOnly(r)?NA:(r.admitCalls||'')},
     {key:'admitChats',label:'Admits (CH)',render:r=>r.admitChats||''},
     {key:'totalAdmits',label:'Total Admits',render:r=>r.totalAdmits?`<span class="admit-badge">${r.totalAdmits}</span>`:''},
   ];
@@ -3142,15 +3146,16 @@ function renderTable(data){
     const nameCell=tr.querySelector('.agent-name'); if(!nameCell) return;
     const rankLabel=i===0?'🥇 1st':i===1?'🥈 2nd':i===2?'🥉 3rd':`#${i+1}`;
     const vobCls=r.vobPct>=4?'#059669':r.vobPct>=3.5?'#D97706':'#DC2626';
+    const co=isChatOnly(r);
     nameCell.addEventListener('mouseenter',()=>{
       tooltip.innerHTML=`
         <div class="lb-tooltip-name">${r.name}</div>
         <div class="lb-tooltip-row"><span class="lb-tooltip-label">Rank</span><span class="lb-tooltip-val">${rankLabel}</span></div>
-        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Total Calls</span><span class="lb-tooltip-val">${r.totalCalls.toLocaleString()}</span></div>
-        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Calls VOB</span><span class="lb-tooltip-val">${r.callsVOB}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Total Calls</span><span class="lb-tooltip-val">${co?'N/A':r.totalCalls.toLocaleString()}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Calls VOB</span><span class="lb-tooltip-val">${co?'N/A':r.callsVOB}</span></div>
         <div class="lb-tooltip-row"><span class="lb-tooltip-label">Chats VOB</span><span class="lb-tooltip-val">${r.chatsVOB}</span></div>
-        <div class="lb-tooltip-row"><span class="lb-tooltip-label">VOB Rate</span><span class="lb-tooltip-val" style="color:${vobCls}">${r.vobPct.toFixed(2)}%</span></div>
-        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Admits (Calls)</span><span class="lb-tooltip-val">${r.admitCalls||0}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">VOB Rate</span><span class="lb-tooltip-val" style="color:${co?'inherit':vobCls}">${co?'N/A':r.vobPct.toFixed(2)+'%'}</span></div>
+        <div class="lb-tooltip-row"><span class="lb-tooltip-label">Admits (Calls)</span><span class="lb-tooltip-val">${co?'N/A':(r.admitCalls||0)}</span></div>
         <div class="lb-tooltip-row"><span class="lb-tooltip-label">Admits (Chats)</span><span class="lb-tooltip-val">${r.admitChats||0}</span></div>
         <div class="lb-tooltip-row"><span class="lb-tooltip-label">Total Admits</span><span class="lb-tooltip-val" style="color:#059669">${r.totalAdmits}</span></div>`;
       tooltip.classList.add('visible');
