@@ -2880,27 +2880,34 @@ function renderCardTrends(calls,outbound,cvob,chvob,vob,ac,ach,admits){
 }
 
 const MONTHLY_ADMIT_TARGET=30;
+// Per-month target overrides (by month name). Any month not listed here
+// falls back to MONTHLY_ADMIT_TARGET.
+const MONTHLY_ADMIT_TARGET_OVERRIDES={September:60,October:60,November:60,December:60};
+function admitTargetForMonth(monthName){
+  return MONTHLY_ADMIT_TARGET_OVERRIDES[monthName] ?? MONTHLY_ADMIT_TARGET;
+}
 function renderGoalTracker(admits){
   const gc=document.getElementById('goal-card');
   if(!gc) return;
   if(currentView!=='monthly'){gc.style.display='none';return;}
   gc.style.display='flex';
-  const pct=Math.min(Math.round((admits/MONTHLY_ADMIT_TARGET)*100),100);
-  const remaining=Math.max(MONTHLY_ADMIT_TARGET-admits,0);
+  const target=admitTargetForMonth(currentMonth);
+  const pct=Math.min(Math.round((admits/target)*100),100);
+  const remaining=Math.max(target-admits,0);
   document.getElementById('goal-fill').style.width=pct+'%';
-  document.getElementById('goal-bar-label').textContent=`${admits} / ${MONTHLY_ADMIT_TARGET} admits`;
+  document.getElementById('goal-bar-label').textContent=`${admits} / ${target} admits`;
   document.getElementById('goal-pct-label').textContent=pct+'%';
   document.getElementById('goal-current').textContent=admits;
   document.getElementById('goal-remaining').textContent=remaining;
-  document.getElementById('goal-target').textContent=MONTHLY_ADMIT_TARGET;
+  document.getElementById('goal-target').textContent=target;
   let sub='';
   if(admits===0) sub='No admits recorded yet this month';
-  else if(admits>=MONTHLY_ADMIT_TARGET) sub='Goal crushed! Outstanding month!';
+  else if(admits>=target) sub='Goal crushed! Outstanding month!';
   else if(pct>=75) sub=`Almost there — ${remaining} more to hit the target!`;
   else if(pct>=50) sub=`Halfway there — ${remaining} admits to go!`;
-  else sub=`${remaining} admits needed to reach the ${MONTHLY_ADMIT_TARGET}-admit goal`;
+  else sub=`${remaining} admits needed to reach the ${target}-admit goal`;
   document.getElementById('goal-subtext').textContent=sub;
-  document.getElementById('goal-fill').style.background=admits>=MONTHLY_ADMIT_TARGET?
+  document.getElementById('goal-fill').style.background=admits>=target?
     'linear-gradient(90deg,#059669,#34d399)':'linear-gradient(90deg,#2563EB,#60A5FA)';
 }
 
