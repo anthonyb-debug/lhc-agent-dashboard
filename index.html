@@ -2048,6 +2048,12 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--brand); ou
 const API_KEY = 'AIzaSyDyOwIurmPpHRv-xRPlo87TO-l_lc1cZD4';
 const SHEET_ID = '1xyJ0otJkqksJAazO3QJRVwCwvnplM0h5Ewn1kyUObkE';
 const RANGE = 'AGENT VOB ADMITS MTD!A:L';
+// Admit goal targets live in a separate tab so managers can edit a cell
+// instead of the code. Tab named "TARGETS", column A = month, column B =
+// target. Month cell can be "September" (applies to any year) or a specific
+// "September 2025". Missing tab / unreadable -> falls back to code defaults.
+const TARGETS_RANGE = 'TARGETS!A:B';
+let RUNTIME_TARGETS = {};
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const COLORS = ['#3ca4cb', '#80cfe9', '#cab16e', '#d99573', '#b35e59', '#8bbfd5', '#708290', '#5f9ec1', '#a0c4d8', '#c9a870', '#e8a87c', '#7a9eb5', '#8faa7c', '#c4785a'];
 
@@ -2186,6 +2192,9 @@ async function loadData(silent=false){
   }
   document.getElementById('error-area').innerHTML='';
   const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(RANGE)}?key=${API_KEY}`;
+  // Start the targets read in parallel; it never throws, so awaiting it below
+  // is safe and just ensures fresh targets are applied before the first paint.
+  const targetsPromise=loadTargets();
   try{
     const res=await fetch(url);
     if(!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
@@ -2208,6 +2217,7 @@ async function loadData(silent=false){
     document.getElementById('info-latest').textContent=now.toLocaleDateString();
     document.getElementById('info-synced').textContent=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     clearInterval(window._countdownTimer);
+    await targetsPromise;
     renderAll(!silent);
   }catch(e){
     document.getElementById('error-area').innerHTML=`<div class="error-msg">⚠️ Could not load data: ${e.message}</div>`;
@@ -2880,18 +2890,42 @@ function renderCardTrends(calls,outbound,cvob,chvob,vob,ac,ach,admits){
 }
 
 const MONTHLY_ADMIT_TARGET=30;
-// Per-month target overrides (by month name). Any month not listed here
-// falls back to MONTHLY_ADMIT_TARGET.
+// Fallback per-month overrides used only if the TARGETS tab is missing or
+// doesn't list the month. The sheet always wins when present.
 const MONTHLY_ADMIT_TARGET_OVERRIDES={September:60,October:60,November:60,December:60};
-function admitTargetForMonth(monthName){
-  return MONTHLY_ADMIT_TARGET_OVERRIDES[monthName] ?? MONTHLY_ADMIT_TARGET;
+function admitTargetForMonth(monthName,year){
+  // 1. Sheet-driven: prefer an exact "Month Year", then a bare "Month".
+  if(year!==undefined && RUNTIME_TARGETS[`${monthName} ${year}`]!==undefined) return RUNTIME_TARGETS[`${monthName} ${year}`];
+  if(RUNTIME_TARGETS[monthName]!==undefined) return RUNTIME_TARGETS[monthName];
+  // 2. Code fallback overrides.
+  if(MONTHLY_ADMIT_TARGET_OVERRIDES[monthName]!==undefined) return MONTHLY_ADMIT_TARGET_OVERRIDES[monthName];
+  // 3. Default.
+  return MONTHLY_ADMIT_TARGET;
+}
+// Best-effort read of the TARGETS tab. Never throws — on any failure the
+// dashboard just keeps using whatever targets it already had (or code defaults).
+async function loadTargets(){
+  try{
+    const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(TARGETS_RANGE)}?key=${API_KEY}`;
+    const res=await fetch(url);
+    if(!res.ok) return;
+    const json=await res.json();
+    const rows=json.values||[];
+    const map={};
+    rows.slice(1).forEach(r=>{
+      const key=(r[0]||'').toString().trim();
+      const val=parseInt((r[1]||'').toString().replace(/,/g,''),10);
+      if(key && Number.isFinite(val)) map[key]=val;
+    });
+    RUNTIME_TARGETS=map;
+  }catch(e){/* keep existing targets */}
 }
 function renderGoalTracker(admits){
   const gc=document.getElementById('goal-card');
   if(!gc) return;
   if(currentView!=='monthly'){gc.style.display='none';return;}
   gc.style.display='flex';
-  const target=admitTargetForMonth(currentMonth);
+  const target=admitTargetForMonth(currentMonth,currentYear);
   const pct=Math.min(Math.round((admits/target)*100),100);
   const remaining=Math.max(target-admits,0);
   document.getElementById('goal-fill').style.width=pct+'%';
